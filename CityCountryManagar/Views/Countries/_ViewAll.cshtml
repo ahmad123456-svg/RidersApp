@@ -1,0 +1,23 @@
+﻿@using RidersApp.ViewModels
+@model IEnumerable<CountryVM>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th style="width:150px;"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>
+                    <a onclick="showInPopup('@Url.Action("AddOrEdit", "Countries", new { id = item.CountryId })', 'Edit Country')" class="btn btn-sm btn-info text-white">Edit</a>
+                    <a onclick="deleteRecord('Countries', @item.CountryId)" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

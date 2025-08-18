@@ -1,0 +1,44 @@
+# Visual Studio / .NET
+.vs/
+bin/
+obj/
+packages/
+*.user
+*.suo
+*.cache
+*.log
+*.db
+*.db-journal
+TestResults/
+
+# Rider
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# publish
+publish/
+
+# node
+node_modules/
+
+# user secrets
+secrets.json
+
+# IIS Express
+/.vs/*
+
+# NuGet
+*.nupkg
+project.lock.json
+
+# Resharper
+_ReSharper*/
+
+# EF Core
+Migrations/**/Snapshot.cs
+
+# Sonar
+.sonar/

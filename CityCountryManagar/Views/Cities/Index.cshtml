@@ -1,0 +1,32 @@
+﻿@using RidersApp.ViewModels
+@{
+    ViewData["Title"] = "Cities";
+}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h4>
+                Cities
+                <button class="btn btn-success float-end" onclick="showInPopup('@Url.Action("AddOrEdit", "Cities")', 'Add City')">Add New</button>
+            </h4>
+        </div>
+        <div class="card-body" id="view-all">
+            @await Html.PartialAsync("_ViewAll", new List<CityVM>())
+        </div>
+    </div>
+</div>
+
+@* Add anti-forgery token for AJAX requests *@
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Load cities on page load
+            $.get('@Url.Action("GetCities", "Cities")', function(data) {
+                $("#view-all").html(data);
+            });
+        });
+    </script>
+}

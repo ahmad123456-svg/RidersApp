@@ -1,0 +1,33 @@
+@using RidersApp.ViewModels
+@model IEnumerable<EmployeeVM>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Father Name</th>
+            <th>Phone No</th>
+            <th>Address</th>
+            <th>Country</th>
+            <th>City</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.FatherName</td>
+                <td>@item.PhoneNo</td>
+                <td>@item.Address</td>
+                <td>@item.CountryName</td>
+                <td>@item.CityName</td>
+                <td>
+                    <a onclick="showInPopup('@Url.Action("AddOrEdit", "Employees", new { id = item.EmployeeId })', 'Edit Employee')" class="btn btn-primary btn-sm text-white">Edit</a>
+                    <a onclick="deleteRecord('Employees', @item.EmployeeId)" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

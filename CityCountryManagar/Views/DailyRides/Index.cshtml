@@ -1,0 +1,32 @@
+﻿@using RidersApp.ViewModels
+@{
+    ViewData["Title"] = "Daily Rides";
+}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h4>
+                Daily Rides
+                <button class="btn btn-success float-end" onclick="showInPopup('@Url.Action("AddOrEdit", "DailyRides")', 'Add Daily Ride')">Add New</button>
+            </h4>
+        </div>
+        <div class="card-body" id="view-all">
+            @await Html.PartialAsync("_ViewAll", new List<DailyRidesVM>())
+        </div>
+    </div>
+</div>
+
+@* Add anti-forgery token for AJAX requests *@
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Load daily rides on page load
+            $.get('@Url.Action("GetDailyRides", "DailyRides")', function(data) {
+                $("#view-all").html(data);
+            });
+        });
+    </script>
+}

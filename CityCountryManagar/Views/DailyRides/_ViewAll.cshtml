@@ -1,0 +1,35 @@
+@using RidersApp.ViewModels
+@model IEnumerable<DailyRidesVM>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Employee</th>
+            <th>Entry Date</th>
+            <th>Credit Amount</th>
+            <th>Cash Amount</th>
+            <th>Expense</th>
+            <th>Today Rides</th>
+            <th>Total Rides</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.EmployeeName</td>
+                <td>@item.EntryDate.ToString("dd/MM/yyyy")</td>
+                <td>@item.CreditAmount.ToString("C")</td>
+                <td>@item.CashAmount.ToString("C")</td>
+                <td>@item.Expense.ToString("C")</td>
+                <td>@item.TodayRides</td>
+                <td>@item.TotalRides</td>
+                <td>
+                    <a onclick="showInPopup('@Url.Action("AddOrEdit", "DailyRides", new { id = item.Id })', 'Edit Daily Ride')" class="btn btn-primary btn-sm text-white">Edit</a>
+                    <a onclick="deleteRecord('DailyRides', @item.Id)" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

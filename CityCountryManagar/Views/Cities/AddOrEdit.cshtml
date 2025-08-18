@@ -1,0 +1,35 @@
+﻿@using RidersApp.ViewModels
+@model CityVM
+
+@{
+    Layout = null;
+}
+
+<form asp-action="AddOrEdit" asp-controller="Cities" method="post" onsubmit="return ajaxFormSubmit(this);">
+    <div class="form-group">
+        <label asp-for="CityName"></label>
+        <input asp-for="CityName" class="form-control" />
+        <span asp-validation-for="CityName" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="PostalCode"></label>
+        <input asp-for="PostalCode" class="form-control" />
+        <span asp-validation-for="PostalCode" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="CountryId" class="control-label"></label>
+        <select asp-for="CountryId" class="form-control" asp-items="ViewBag.Countries">
+            <option value="">-- Select Country --</option>
+        </select>
+        <span asp-validation-for="CountryId" class="text-danger"></span>
+    </div>
+
+    <input type="hidden" asp-for="CityId" />
+    <div class="form-group mt-2 text-end">
+        <button type="submit" class="btn btn-success">Save</button>
+    </div>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
