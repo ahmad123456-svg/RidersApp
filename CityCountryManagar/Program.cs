@@ -63,7 +63,7 @@ using (var scope = app.Services.CreateScope())
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
     string adminEmail = "admin@site.com";
-    string adminPassword = "Admin@123";
+    string adminPassword = "Admin@123"; 
 
     // Create role if missing
     if (!await roleManager.RoleExistsAsync("Admin"))
