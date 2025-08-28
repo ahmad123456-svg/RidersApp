@@ -39,6 +39,9 @@
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="DailyRides" asp-action="Index">Daily Rides</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Configurations" asp-action="Index">Configurations</a>
+                            </li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="settingsDropdown" role="button"
                                    data-bs-toggle="dropdown" aria-expanded="false">
@@ -46,6 +49,7 @@
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="settingsDropdown">
                                     <li><a class="dropdown-item" asp-controller="Home" asp-action="Privacy">Privacy</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Configurations" asp-action="Index">Configurations</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><partial name="_LoginPartial" /></li>
                                 </ul>
@@ -74,6 +78,19 @@
     <footer>
         <p>© 2025 - Riders App | <a href="/Home/Privacy">Privacy Policy</a></p>
     </footer>
+
+    <!-- Modal used by showInPopup (partial views loaded via AJAX) -->
+    <div class="modal fade" id="form-modal" tabindex="-1" role="dialog" aria-labelledby="formModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"> </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body"></div>
+            </div>
+        </div>
+    </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

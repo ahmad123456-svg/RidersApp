@@ -1,0 +1,15 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using RidersApp.ViewModels;
+
+namespace RidersApp.IServices
+{
+    public interface IConfigurationService
+    {
+        Task<List<ConfigurationVM>> GetAll();
+        Task<ConfigurationVM> GetById(int id);
+        Task<List<ConfigurationVM>> Add(ConfigurationVM vm);
+        Task<List<ConfigurationVM>> Edit(ConfigurationVM vm);
+        Task<List<ConfigurationVM>> Delete(int id);
+    }
+}

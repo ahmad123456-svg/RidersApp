@@ -55,24 +55,33 @@ function deleteRecord(controller, id) {
                 console.log('Delete response received:', res);
                 
                 if (res.success) {
-                    // Always refresh the data after successful deletion
-                    if (controller === "Employees") {
-                        $.get(`/${controller}/GetEmployees`, function (data) {
-                            $("#view-all").html(data);
-                        });
-                    } else if (controller === "Cities") {
-                        $.get(`/${controller}/GetCities`, function (data) {
-                            $("#view-all").html(data);
-                        });
-                    } else if (controller === "Countries") {
-                        $.get(`/${controller}/GetCountries`, function (data) {
-                            $("#view-all").html(data);
-                        });
-                    } else if (controller === "DailyRides") {
-                        $.get(`/${controller}/GetDailyRides`, function (data) {
-                            $("#view-all").html(data);
-                        });
-                    }
+                        // Use server-returned HTML when available for immediate refresh
+                        if (res.html) {
+                            $("#view-all").html(res.html);
+                        } else {
+                            // Fallback: call the controller-specific Get action for refresh
+                            if (controller === "Employees") {
+                                $.get(`/${controller}/GetEmployees`, function (data) {
+                                    $("#view-all").html(data);
+                                });
+                            } else if (controller === "Cities") {
+                                $.get(`/${controller}/GetCities`, function (data) {
+                                    $("#view-all").html(data);
+                                });
+                            } else if (controller === "Countries") {
+                                $.get(`/${controller}/GetCountries`, function (data) {
+                                    $("#view-all").html(data);
+                                });
+                            } else if (controller === "DailyRides") {
+                                $.get(`/${controller}/GetDailyRides`, function (data) {
+                                    $("#view-all").html(data);
+                                });
+                            } else if (controller === "Configurations") {
+                                $.get(`/${controller}/GetConfigurations`, function (data) {
+                                    $("#view-all").html(data);
+                                });
+                            }
+                        }
                     
                     if (res.message) {
                         showSuccessMessage(res.message);

@@ -1,0 +1,30 @@
+@using RidersApp.ViewModels
+@model ConfigurationVM
+
+@{
+    Layout = null;
+}
+
+<form id="configuration-form" asp-action="AddOrEdit" asp-controller="Configurations" method="post" onsubmit="return ajaxFormSubmit(this)">
+    <input type="hidden" asp-for="ConfigurationId" />
+
+    <div class="form-group mb-3">
+        <label asp-for="KeyName" class="control-label"></label>
+        <input asp-for="KeyName" class="form-control" />
+        <span asp-validation-for="KeyName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Value" class="control-label"></label>
+        <textarea asp-for="Value" class="form-control"></textarea>
+        <span asp-validation-for="Value" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mt-2">
+        <button type="submit" class="btn btn-primary">Save</button>
+    </div>
+</form>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

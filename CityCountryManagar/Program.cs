@@ -31,6 +31,8 @@ builder.Services.AddScoped<ICityService, CityService>();
 builder.Services.AddScoped<ICountryService, CountryService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IDailyRidesService, DailyRidesService>();
+builder.Services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
+builder.Services.AddScoped<IConfigurationService, ConfigurationService>();
 
 // Login path configuration
 builder.Services.ConfigureApplicationCookie(options =>
@@ -101,6 +103,35 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
+}
+
+// Ensure Configurations table exists (idempotent creation to avoid runtime errors
+// when the EF migration hasn't been applied yet). This executes a safe
+// CREATE TABLE IF NOT EXISTS style check for SQL Server.
+using (var scope2 = app.Services.CreateScope())
+{
+    try
+    {
+        var services = scope2.ServiceProvider;
+        var db = services.GetRequiredService<ApplicationDbContext>();
+        var createSql = @"
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Configurations]') AND type in (N'U'))
+BEGIN
+    CREATE TABLE [dbo].[Configurations](
+        [ConfigurationId] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+        [KeyName] NVARCHAR(200) NOT NULL,
+        [Value] NVARCHAR(2000) NULL
+    );
+END
+";
+        db.Database.ExecuteSqlRaw(createSql);
+    }
+    catch (Exception ex)
+    {
+        // If table creation fails (permissions/database offline), we don't want
+        // to crash the app here. Log to console for visibility.
+        Console.WriteLine("Warning: could not ensure Configurations table exists: " + ex.Message);
+    }
 }
 
 app.UseHttpsRedirection();

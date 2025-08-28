@@ -1,0 +1,20 @@
+@model RidersApp.ViewModels.ConfigurationVM
+
+@{
+    ViewData["Title"] = "Configuration Details";
+}
+
+<h2>Configuration Details</h2>
+<div>
+    <h4>@Model.KeyName</h4>
+    <dl class="row">
+        <dt class="col-sm-2">Key</dt>
+        <dd class="col-sm-10">@Model.KeyName</dd>
+        <dt class="col-sm-2">Value</dt>
+        <dd class="col-sm-10">@Model.Value</dd>
+    </dl>
+</div>
+<p>
+    <a asp-action="Edit" asp-route-id="@Model.ConfigurationId" class="btn btn-warning">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</p>

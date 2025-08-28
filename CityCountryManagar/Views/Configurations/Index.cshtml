@@ -1,0 +1,34 @@
+@using RidersApp.ViewModels
+@{
+    ViewData["Title"] = "Configurations";
+}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h4>
+                Configurations
+                <button class="btn btn-success float-end"
+                        onclick="showInPopup('@Url.Action("AddOrEdit", "Configurations")', 'Add Configuration')">
+                    Add New
+                </button>
+            </h4>
+        </div>
+        <div class="card-body" id="view-all">
+            @Html.Partial("_ViewAll", new List<ConfigurationVM>())
+        </div>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $.get('@Url.Action("GetConfigurations", "Configurations")', function(data) {
+                $("#view-all").html(data);
+            });
+        });
+    </script>
+}
+@* The Index view uses AJAX to load the _ViewAll partial; the older scaffolded table was removed to avoid duplicate content. *@

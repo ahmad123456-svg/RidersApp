@@ -1,0 +1,25 @@
+@using RidersApp.ViewModels
+@model IEnumerable<ConfigurationVM>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Key</th>
+            <th>Value</th>
+            <th style="width:150px;"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.KeyName</td>
+                <td>@item.Value</td>
+                <td>
+                    <a onclick="showInPopup('@Url.Action("AddOrEdit", "Configurations", new { id = item.ConfigurationId })', 'Edit Configuration')" class="btn btn-sm btn-info text-white">Edit</a>
+                    <a onclick="deleteRecord('Configurations', @item.ConfigurationId)" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
