@@ -41,7 +41,7 @@ namespace RidersApp.Services
             var entity = await _repo.GetByIdAsync(vm.ConfigurationId);
             if (entity != null)
             {
-                entity.KeyName = vm.KeyName;
+                // Do not allow changing KeyName on edit — only update the Value
                 entity.Value = vm.Value;
                 await _repo.UpdateAsync(entity);
             }

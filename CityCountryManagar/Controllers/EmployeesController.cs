@@ -58,9 +58,9 @@ namespace RidersApp.Controllers
                 {
                     await _employeeService.Add(vm);
                     message = "Data saved successfully";
-                    }
-                    else
-                    {
+                }
+                else
+                {
                     await _employeeService.Edit(vm);
                     message = "Data updated successfully";
                 }
@@ -90,7 +90,7 @@ namespace RidersApp.Controllers
             try
             {
                 var listVm = await _employeeService.Delete(id);
-                
+
                 return Json(new
                 {
                     success = true,
@@ -99,7 +99,7 @@ namespace RidersApp.Controllers
             }
             catch (Exception ex)
             {
-                // Log the error (you can implement proper logging here)
+                // Log the error (implement proper logging here if needed)
                 return Json(new
                 {
                     success = false,

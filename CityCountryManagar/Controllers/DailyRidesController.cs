@@ -27,7 +27,7 @@ namespace RidersApp.Controllers
         }
 
         public async Task<IActionResult> Index()
-         {
+        {
             return View();
         }
 
@@ -63,7 +63,7 @@ namespace RidersApp.Controllers
             {
                 string message;
                 List<DailyRidesVM> allDailyRides;
-                
+
                 if (id == 0)
                 {
                     allDailyRides = await _dailyRidesService.Add(dailyRideVM);
@@ -77,7 +77,7 @@ namespace RidersApp.Controllers
 
                 return Json(new { isValid = true, message, html = Helper.RenderRazorViewToString(this, "_ViewAll", allDailyRides) });
             }
-            
+
             var employees = await _employeeService.GetAll();
             ViewBag.Employees = new SelectList(employees, "EmployeeId", "Name");
             return PartialView(dailyRideVM);
@@ -99,13 +99,13 @@ namespace RidersApp.Controllers
                         message = $"Daily ride record with ID {id} not found."
                     });
                 }
-                
+
                 // Direct delete from repository
                 await _dailyRidesService.Delete(id);
-                
+
                 // Get updated list
                 var dailyRides = await _dailyRidesService.GetAll();
-                
+
                 return Json(new
                 {
                     success = true,

@@ -13,11 +13,13 @@ namespace RidersApp.Services
     {
         private readonly IDailyRidesRepository _dailyRidesRepository;
         private readonly IEmployeeRepository _employeeRepository;
+        private readonly RidersApp.IServices.IConfigurationService _configurationService;
 
-        public DailyRidesService(IDailyRidesRepository dailyRidesRepository, IEmployeeRepository employeeRepository)
+        public DailyRidesService(IDailyRidesRepository dailyRidesRepository, IEmployeeRepository employeeRepository, RidersApp.IServices.IConfigurationService configurationService)
         {
             _dailyRidesRepository = dailyRidesRepository;
             _employeeRepository = employeeRepository;
+            _configurationService = configurationService;
         }
 
         public async Task<List<DailyRidesVM>> GetAll()
@@ -76,12 +78,25 @@ namespace RidersApp.Services
 
         public async Task<List<DailyRidesVM>> Add(DailyRidesVM vm)
         {
+            // Calculate WAT values from configuration
+            var configs = await _configurationService.GetAll();
+            decimal creditPercent = 0;
+            decimal cashPercent = 0;
+            var creditCfg = configs.FirstOrDefault(c => string.Equals(c.KeyName, "CreditWAT", StringComparison.OrdinalIgnoreCase));
+            var cashCfg = configs.FirstOrDefault(c => string.Equals(c.KeyName, "CashWAT", StringComparison.OrdinalIgnoreCase));
+
+            // parse percentage values from configurations so WAT is computed correctly
+            if (creditCfg != null && decimal.TryParse(creditCfg.Value, out var cp)) creditPercent = cp;
+            if (cashCfg != null && decimal.TryParse(cashCfg.Value, out var cashp)) cashPercent = cashp;
+
             var entity = new DailyRides
             {
                 CreditAmount = vm.CreditAmount,
-                CreditWAT = vm.CreditWAT,
+                // Use simpler formula: CreditWAT = CreditAmount * (creditPercent / 100)
+                CreditWAT = Math.Round(vm.CreditAmount * (creditPercent / 100), 2),
                 CashAmount = vm.CashAmount,
-                CashWAT = vm.CashWAT,
+                // CashWAT = CashAmount * (cashPercent / 100)
+                CashWAT = Math.Round(vm.CashAmount * (cashPercent / 100), 2),
                 Expense = vm.Expense,
                 EntryDate = vm.EntryDate,
                 EmployeeId = vm.EmployeeId,
@@ -103,10 +118,21 @@ namespace RidersApp.Services
             var entity = await _dailyRidesRepository.GetByIdAsync(vm.Id);
             if (entity != null)
             {
+                // Recalculate WAT values using configuration
+                var configs = await _configurationService.GetAll();
+                decimal creditPercent = 0;
+                decimal cashPercent = 0;
+                var creditCfg = configs.FirstOrDefault(c => string.Equals(c.KeyName, "CreditWAT", StringComparison.OrdinalIgnoreCase));
+                var cashCfg = configs.FirstOrDefault(c => string.Equals(c.KeyName, "CashWAT", StringComparison.OrdinalIgnoreCase));
+                // parse percentage values from configurations so WAT is computed correctly
+                if (creditCfg != null && decimal.TryParse(creditCfg.Value, out var cp)) creditPercent = cp;
+                if (cashCfg != null && decimal.TryParse(cashCfg.Value, out var cashp)) cashPercent = cashp;
+
                 entity.CreditAmount = vm.CreditAmount;
-                entity.CreditWAT = vm.CreditWAT;
+                // Recalculate using the simpler formula form
+                entity.CreditWAT = Math.Round(vm.CreditAmount * (creditPercent / 100), 2);
                 entity.CashAmount = vm.CashAmount;
-                entity.CashWAT = vm.CashWAT;
+                entity.CashWAT = Math.Round(vm.CashAmount * (cashPercent / 100), 2);
                 entity.Expense = vm.Expense;
                 entity.EntryDate = vm.EntryDate;
                 entity.EmployeeId = vm.EmployeeId;
@@ -137,7 +163,7 @@ namespace RidersApp.Services
 
                 // Delete the daily ride record
                 await _dailyRidesRepository.DeleteAsync(id);
-                
+
                 // Return updated list
                 var result = await GetAll();
                 return result;

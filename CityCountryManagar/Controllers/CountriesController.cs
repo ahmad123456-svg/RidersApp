@@ -30,7 +30,7 @@ namespace RidersApp.Controllers
 
         public async Task<IActionResult> AddOrEdit(int id = 0)
         {
-           
+
             if (id == 0)
                 return View(new CountryVM());
 
@@ -92,13 +92,13 @@ namespace RidersApp.Controllers
                         message = $"Country with ID {id} not found."
                     });
                 }
-                
+
                 // Direct delete from repository
                 await _countryService.Delete(id);
-                
+
                 // Get updated list
                 var countries = await _countryService.GetAll();
-                
+
                 return Json(new
                 {
                     success = true,

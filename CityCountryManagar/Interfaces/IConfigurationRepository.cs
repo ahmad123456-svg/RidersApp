@@ -7,10 +7,10 @@ namespace RidersApp.Interfaces
     public interface IConfigurationRepository
     {
         Task<IEnumerable<Configuration>> GetAllAsync();
-    Task<Configuration> GetByIdAsync(int id);
+        Task<Configuration> GetByIdAsync(int id);
         Task AddAsync(Configuration config);
         Task UpdateAsync(Configuration config);
-    Task DeleteAsync(int id);
-    Task<bool> ExistsAsync(int id);
+        Task DeleteAsync(int id);
+        Task<bool> ExistsAsync(int id);
     }
 }

@@ -10,7 +10,14 @@
 
     <div class="form-group mb-3">
         <label asp-for="KeyName" class="control-label"></label>
-        <input asp-for="KeyName" class="form-control" />
+        @if (Model != null && Model.ConfigurationId > 0)
+        {
+            <input asp-for="KeyName" class="form-control" readonly />
+        }
+        else
+        {
+            <input asp-for="KeyName" class="form-control" />
+        }
         <span asp-validation-for="KeyName" class="text-danger"></span>
     </div>
 

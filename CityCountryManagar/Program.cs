@@ -1,4 +1,6 @@
-﻿using RidersApp.Data;
+﻿using System;
+using System.Linq;
+using RidersApp.Data;
 using RidersApp.DbModels;
 using RidersApp.Interfaces;
 using RidersApp.Repositories;
@@ -65,14 +67,14 @@ using (var scope = app.Services.CreateScope())
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
     string adminEmail = "admin@site.com";
-    string adminPassword = "Admin@123"; 
+    string adminPassword = "Admin@123";
 
     // Create role if missing
     if (!await roleManager.RoleExistsAsync("Admin"))
     {
         await roleManager.CreateAsync(new IdentityRole("Admin"));
     }
-     if (!await roleManager.RoleExistsAsync("User"))
+    if (!await roleManager.RoleExistsAsync("User"))
     {
         await roleManager.CreateAsync(new IdentityRole("User"));
     }
@@ -131,6 +133,34 @@ END
         // If table creation fails (permissions/database offline), we don't want
         // to crash the app here. Log to console for visibility.
         Console.WriteLine("Warning: could not ensure Configurations table exists: " + ex.Message);
+    }
+}
+
+// Seed default configuration values (CreditWAT and CashWAT) if missing
+using (var scope3 = app.Services.CreateScope())
+{
+    try
+    {
+        var services = scope3.ServiceProvider;
+        var configService = services.GetRequiredService<RidersApp.IServices.IConfigurationService>();
+
+        // Helper to ensure a configuration exists with given key and value
+        async Task EnsureConfig(string key, string value)
+        {
+            var all = await configService.GetAll();
+            if (!all.Any(c => string.Equals(c.KeyName, key, StringComparison.OrdinalIgnoreCase)))
+            {
+                await configService.Add(new RidersApp.ViewModels.ConfigurationVM { KeyName = key, Value = value });
+            }
+        }
+
+        // Seed the two values requested
+        await EnsureConfig("CreditWAT", "10");
+        await EnsureConfig("CashWAT", "10");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Warning: could not seed Configurations: " + ex.Message);
     }
 }
 

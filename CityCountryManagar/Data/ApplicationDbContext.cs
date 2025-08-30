@@ -18,7 +18,7 @@ namespace RidersApp.Data
         public DbSet<City> Cities { get; set; }
         public DbSet<Employee> Employees { get; set; }
         public DbSet<DailyRides> DailyRides { get; set; }
-    public DbSet<Configuration> Configurations { get; set; }
+        public DbSet<Configuration> Configurations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

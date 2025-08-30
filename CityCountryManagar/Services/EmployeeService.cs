@@ -117,7 +117,7 @@ namespace RidersApp.Services
 
                 // Delete the employee
                 await _employeeRepository.DeleteEmployee(id);
-                
+
                 // Return updated list
                 var result = await GetAll();
                 return result;

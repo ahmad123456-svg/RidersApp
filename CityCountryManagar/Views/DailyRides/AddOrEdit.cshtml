@@ -14,10 +14,13 @@
                 <span asp-validation-for="CreditAmount" class="text-danger"></span>
             </div>
         </div>
+    @* CreditWAT is calculated from CreditAmount and configuration; user should not enter it *@
+    </div>
+    <div class="row">
         <div class="col-md-6">
             <div class="form-group">
                 <label asp-for="CreditWAT"></label>
-                <input asp-for="CreditWAT" class="form-control" type="number" step="0.01" />
+                <input asp-for="CreditWAT" class="form-control" type="text" readonly />
                 <span asp-validation-for="CreditWAT" class="text-danger"></span>
             </div>
         </div>
@@ -30,10 +33,13 @@
                 <span asp-validation-for="CashAmount" class="text-danger"></span>
             </div>
         </div>
+    @* CashWAT is calculated from CashAmount and configuration; user should not enter it *@
+    </div>
+    <div class="row">
         <div class="col-md-6">
             <div class="form-group">
                 <label asp-for="CashWAT"></label>
-                <input asp-for="CashWAT" class="form-control" type="number" step="0.01" />
+                <input asp-for="CashWAT" class="form-control" type="text" readonly />
                 <span asp-validation-for="CashWAT" class="text-danger"></span>
             </div>
         </div>

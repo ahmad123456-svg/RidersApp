@@ -62,7 +62,7 @@ namespace RidersApp.Services
             try
             {
                 Console.WriteLine($"CityService.Delete: Starting delete operation for city ID: {id}");
-                
+
                 // Check if city exists
                 var city = await _cityRepository.GetByIdAsync(id);
                 if (city == null)
@@ -70,14 +70,14 @@ namespace RidersApp.Services
                     Console.WriteLine($"CityService.Delete: City with ID {id} not found");
                     throw new InvalidOperationException($"City with ID {id} not found.");
                 }
-                
+
                 Console.WriteLine($"CityService.Delete: Found city: {city.CityName}");
 
                 // Check if city has related employees
                 Console.WriteLine($"CityService.Delete: Checking for related employees...");
                 var hasEmployees = await _cityRepository.HasRelatedEmployeesAsync(id);
                 Console.WriteLine($"CityService.Delete: Has related employees: {hasEmployees}");
-                
+
                 if (hasEmployees)
                 {
                     Console.WriteLine($"CityService.Delete: Cannot delete city '{city.CityName}' - has related employees");
@@ -88,7 +88,7 @@ namespace RidersApp.Services
                 Console.WriteLine($"CityService.Delete: Deleting city from repository...");
                 await _cityRepository.DeleteAsync(id);
                 Console.WriteLine($"CityService.Delete: City deleted from repository successfully");
-                
+
                 // Return updated list
                 Console.WriteLine($"CityService.Delete: Getting updated city list...");
                 var result = await GetAll();
@@ -99,7 +99,7 @@ namespace RidersApp.Services
             {
                 Console.WriteLine($"CityService.Delete: Exception occurred: {ex.Message}");
                 Console.WriteLine($"CityService.Delete: Stack trace: {ex.StackTrace}");
-                
+
                 // Log the error (you can implement proper logging here)
                 var errorMessage = $"Failed to delete city with ID {id}. Error: {ex.Message}";
                 if (ex.InnerException != null)
