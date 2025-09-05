@@ -7,6 +7,14 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/navbar.css" asp-append-version="true" /> <!-- New CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="//cdn.datatables.net/2.3.3/css/dataTables.dataTables.min.css" />
+    <style>
+        body { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+        table.dataTable thead th { background: #f8f9fa; }
+        table.dataTable { width: 100% !important; }
+    </style>
 </head>
 <body>
     <header>
@@ -95,6 +103,32 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script>
+        // Helper to initialize a DataTable on a given selector with sensible defaults
+        function initDataTable(selector) {
+            if (!window.$) return;
+            $(selector).each(function () {
+                if ($.fn.DataTable.isDataTable(this)) return; // already initialized
+                $(this).DataTable({
+                    paging: true,
+                    pageLength: 25,
+                    lengthChange: true,
+                    searching: true,
+                    ordering: true,
+                    info: true,
+                    autoWidth: false,
+                    order: [], // no initial ordering
+                    language: {
+                        search: "Search:",
+                        paginate: { previous: "Previous", next: "Next" }
+                    }
+                });
+            });
+        }
+        // Auto-initialize when a page with a table loads
+        $(function () { initDataTable('.datatable'); });
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

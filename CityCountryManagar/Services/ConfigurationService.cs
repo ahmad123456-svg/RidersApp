@@ -27,13 +27,8 @@ namespace RidersApp.Services
 
             await _repo.AddAsync(entity);
 
-            var items = await _repo.GetAllAsync();
-            return items.Select(i => new ConfigurationVM
-            {
-                ConfigurationId = i.ConfigurationId,
-                KeyName = i.KeyName,
-                Value = i.Value
-            }).ToList();
+            // Return configurations ordered alphabetically
+            return await GetAll();
         }
 
         public async Task<List<ConfigurationVM>> Edit(ConfigurationVM vm)
@@ -46,24 +41,21 @@ namespace RidersApp.Services
                 await _repo.UpdateAsync(entity);
             }
 
-            var items = await _repo.GetAllAsync();
-            return items.Select(i => new ConfigurationVM
-            {
-                ConfigurationId = i.ConfigurationId,
-                KeyName = i.KeyName,
-                Value = i.Value
-            }).ToList();
+            // Return configurations ordered alphabetically
+            return await GetAll();
         }
 
         public async Task<List<ConfigurationVM>> GetAll()
         {
             var items = await _repo.GetAllAsync();
-            return items.Select(i => new ConfigurationVM
-            {
-                ConfigurationId = i.ConfigurationId,
-                KeyName = i.KeyName,
-                Value = i.Value
-            }).ToList();
+            return items
+                .OrderBy(i => (i.KeyName ?? string.Empty).ToLowerInvariant())
+                .Select(i => new ConfigurationVM
+                {
+                    ConfigurationId = i.ConfigurationId,
+                    KeyName = i.KeyName,
+                    Value = i.Value
+                }).ToList();
         }
 
         public async Task<ConfigurationVM> GetById(int id)
@@ -81,13 +73,9 @@ namespace RidersApp.Services
         public async Task<List<ConfigurationVM>> Delete(int id)
         {
             await _repo.DeleteAsync(id);
-            var items = await _repo.GetAllAsync();
-            return items.Select(i => new ConfigurationVM
-            {
-                ConfigurationId = i.ConfigurationId,
-                KeyName = i.KeyName,
-                Value = i.Value
-            }).ToList();
+            
+            // Return configurations ordered alphabetically
+            return await GetAll();
         }
     }
 }

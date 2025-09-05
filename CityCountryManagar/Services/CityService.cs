@@ -23,14 +23,17 @@ namespace RidersApp.Services
         public async Task<List<CityVM>> GetAll()
         {
             var cities = await _cityRepository.GetAllAsync();
-            return cities.Select(c => new CityVM
-            {
-                CityId = c.CityId,
-                CityName = c.CityName,
-                PostalCode = c.PostalCode,
-                CountryId = c.CountryId,
-                CountryName = c.Country != null ? c.Country.Name : null
-            }).ToList();
+            // Return cities ordered alphabetically by CityName (case-insensitive)
+            return cities
+                .OrderBy(c => (c.CityName ?? string.Empty).ToLowerInvariant())
+                .Select(c => new CityVM
+                {
+                    CityId = c.CityId,
+                    CityName = c.CityName,
+                    PostalCode = c.PostalCode,
+                    CountryId = c.CountryId,
+                    CountryName = c.Country != null ? c.Country.Name : null
+                }).ToList();
         }
 
         public async Task<List<CityVM>> Add(CityVM vm)

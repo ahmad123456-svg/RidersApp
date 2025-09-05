@@ -1,7 +1,7 @@
 @using RidersApp.ViewModels
 @model IEnumerable<EmployeeVM>
 
-<table class="table table-bordered">
+<table id="employeesTable" class="table table-striped table-hover datatable">
     <thead>
         <tr>
             <th>Name</th>
@@ -31,3 +31,4 @@
         }
     </tbody>
 </table>
+<script>initDataTable('#employeesTable');</script>

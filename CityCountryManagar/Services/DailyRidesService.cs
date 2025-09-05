@@ -25,27 +25,29 @@ namespace RidersApp.Services
         public async Task<List<DailyRidesVM>> GetAll()
         {
             var dailyRides = await _dailyRidesRepository.GetAllAsync();
-            return dailyRides.Select(d => new DailyRidesVM
-            {
-                Id = d.Id,
-                CreditAmount = d.CreditAmount,
-                CreditWAT = d.CreditWAT,
-                CashAmount = d.CashAmount,
-                CashWAT = d.CashWAT,
-                Expense = d.Expense,
-                EntryDate = d.EntryDate,
-                EmployeeId = d.EmployeeId,
-                EmployeeName = d.Employee != null ? d.Employee.Name : null,
-                TodayRides = d.TodayRides,
-                OverRides = d.OverRides,
-                OverRidesAmount = d.OverRidesAmount,
-                InsertDate = d.InsertDate,
-                UpdateDate = d.UpdateDate,
-                InsertedBy = d.InsertedBy,
-                UpdatedBy = d.UpdatedBy,
-                TotalRides = d.TotalRides,
-                LessAmount = d.LessAmount
-            }).ToList();
+            return dailyRides
+                .OrderBy(d => (d.Employee != null ? d.Employee.Name : string.Empty).ToLowerInvariant())
+                .Select(d => new DailyRidesVM
+                {
+                    Id = d.Id,
+                    CreditAmount = d.CreditAmount,
+                    CreditWAT = d.CreditWAT,
+                    CashAmount = d.CashAmount,
+                    CashWAT = d.CashWAT,
+                    Expense = d.Expense,
+                    EntryDate = d.EntryDate,
+                    EmployeeId = d.EmployeeId,
+                    EmployeeName = d.Employee != null ? d.Employee.Name : null,
+                    TodayRides = d.TodayRides,
+                    OverRides = d.OverRides,
+                    OverRidesAmount = d.OverRidesAmount,
+                    InsertDate = d.InsertDate,
+                    UpdateDate = d.UpdateDate,
+                    InsertedBy = d.InsertedBy,
+                    UpdatedBy = d.UpdatedBy,
+                    TotalRides = d.TotalRides,
+                    LessAmount = d.LessAmount
+                }).ToList();
         }
 
         public async Task<DailyRidesVM> GetById(int id)
@@ -80,23 +82,23 @@ namespace RidersApp.Services
         {
             // Calculate WAT values from configuration
             var configs = await _configurationService.GetAll();
-            decimal creditPercent = 0;
             decimal cashPercent = 0;
-            var creditCfg = configs.FirstOrDefault(c => string.Equals(c.KeyName, "CreditWAT", StringComparison.OrdinalIgnoreCase));
+            decimal creditPercent = 0;
             var cashCfg = configs.FirstOrDefault(c => string.Equals(c.KeyName, "CashWAT", StringComparison.OrdinalIgnoreCase));
+            var creditCfg = configs.FirstOrDefault(c => string.Equals(c.KeyName, "CreditWAT", StringComparison.OrdinalIgnoreCase));
 
             // parse percentage values from configurations so WAT is computed correctly
-            if (creditCfg != null && decimal.TryParse(creditCfg.Value, out var cp)) creditPercent = cp;
             if (cashCfg != null && decimal.TryParse(cashCfg.Value, out var cashp)) cashPercent = cashp;
+            if (creditCfg != null && decimal.TryParse(creditCfg.Value, out var cp)) creditPercent = cp;
 
             var entity = new DailyRides
             {
-                CreditAmount = vm.CreditAmount,
-                // Use simpler formula: CreditWAT = CreditAmount * (creditPercent / 100)
-                CreditWAT = Math.Round(vm.CreditAmount * (creditPercent / 100), 2),
                 CashAmount = vm.CashAmount,
                 // CashWAT = CashAmount * (cashPercent / 100)
                 CashWAT = Math.Round(vm.CashAmount * (cashPercent / 100), 2),
+                CreditAmount = vm.CreditAmount,
+                // Use simpler formula: CreditWAT = CreditAmount * (creditPercent / 100)
+                CreditWAT = Math.Round(vm.CreditAmount * (creditPercent / 100), 2),
                 Expense = vm.Expense,
                 EntryDate = vm.EntryDate,
                 EmployeeId = vm.EmployeeId,

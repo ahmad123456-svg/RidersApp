@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using RidersApp.IServices;
@@ -33,18 +33,20 @@ namespace RidersApp.Services
                 .Include(e => e.City)
                 .ToListAsync();
 
-            return employees.Select(e => new EmployeeVM
-            {
-                EmployeeId = e.EmployeeId,
-                Name = e.Name,
-                FatherName = e.FatherName,
-                PhoneNo = e.PhoneNo,
-                Address = e.Address,
-                CountryId = e.CountryId,
-                CityId = e.CityId,
-                CountryName = e.Country != null ? e.Country.Name : null,
-                CityName = e.City != null ? e.City.CityName : null
-            }).ToList();
+            return employees
+                .OrderBy(e => (e.Name ?? string.Empty).ToLowerInvariant())
+                .Select(e => new EmployeeVM
+                {
+                    EmployeeId = e.EmployeeId,
+                    Name = e.Name,
+                    FatherName = e.FatherName,
+                    PhoneNo = e.PhoneNo,
+                    Address = e.Address,
+                    CountryId = e.CountryId,
+                    CityId = e.CityId,
+                    CountryName = e.Country != null ? e.Country.Name : null,
+                    CityName = e.City != null ? e.City.CityName : null
+                }).ToList();
         }
 
         public async Task<EmployeeVM> GetById(int id)
@@ -83,6 +85,7 @@ namespace RidersApp.Services
             };
 
             await _employeeRepository.AddEmployee(employee);
+            // Return employees ordered alphabetically
             return await GetAll();
         }
 
@@ -100,7 +103,7 @@ namespace RidersApp.Services
 
                 await _employeeRepository.UpdateEmployee(employee);
             }
-
+            // Return employees ordered alphabetically
             return await GetAll();
         }
 

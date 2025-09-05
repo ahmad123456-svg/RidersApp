@@ -4,19 +4,14 @@
 }
 
 <div class="container mt-4">
-    <div class="card">
-        <div class="card-header">
-            <h4>
-                Configurations
-                <button class="btn btn-success float-end"
-                        onclick="showInPopup('@Url.Action("AddOrEdit", "Configurations")', 'Add Configuration')">
-                    Add New
-                </button>
-            </h4>
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h4 class="mb-0">Configurations</h4>
+        <div>
+            <button class="btn btn-success" onclick="showInPopup('@Url.Action("AddOrEdit", "Configurations")', 'Add Configuration')">Add New</button>
         </div>
-        <div class="card-body" id="view-all">
-            @Html.Partial("_ViewAll", new List<ConfigurationVM>())
-        </div>
+    </div>
+    <div id="view-all">
+        @Html.Partial("_ViewAll", new List<ConfigurationVM>())
     </div>
 </div>
 

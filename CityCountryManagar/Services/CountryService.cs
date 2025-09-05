@@ -27,12 +27,8 @@ namespace RidersApp.Services
 
             await _countryRepository.AddAsync(entity);
 
-            var countries = await _countryRepository.GetAllAsync();
-            return countries.Select(c => new CountryVM
-            {
-                CountryId = c.CountryId,
-                Name = c.Name
-            }).ToList();
+            // Return countries ordered alphabetically
+            return await GetAll();
         }
 
         public async Task<List<CountryVM>> Edit(CountryVM vm)
@@ -44,23 +40,21 @@ namespace RidersApp.Services
                 await _countryRepository.UpdateAsync(entity);
             }
 
-            var countries = await _countryRepository.GetAllAsync();
-            return countries.Select(c => new CountryVM
-            {
-                CountryId = c.CountryId,
-                Name = c.Name
-            }).ToList();
+            // Return countries ordered alphabetically
+            return await GetAll();
         }
 
         public async Task<List<CountryVM>> GetAll()
-        {
-            var countries = await _countryRepository.GetAllAsync();
-            return countries.Select(c => new CountryVM
+    {
+        var countries = await _countryRepository.GetAllAsync();
+        return countries
+            .OrderBy(c => (c.Name ?? string.Empty).ToLowerInvariant())
+            .Select(c => new CountryVM
             {
                 CountryId = c.CountryId,
                 Name = c.Name
             }).ToList();
-        }
+    }
 
         public async Task<CountryVM> GetById(int id)
         {
