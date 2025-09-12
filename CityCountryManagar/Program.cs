@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using RidersApp.Data;
 using RidersApp.DbModels;
@@ -88,7 +88,8 @@ using (var scope = app.Services.CreateScope())
             UserName = adminEmail,
             Email = adminEmail,
             EmailConfirmed = true,
-            FirstName = "Admin",     // ✅ Required to prevent NULL exception
+            FirstName = "Admin",
+            Role = "Admin",
             LastName = "User"        // ✅ Required to prevent NULL exception
         };
 
@@ -170,6 +171,17 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Redirect to login page if not authenticated
+app.Use(async (context, next) =>
+{
+    if (!context.User.Identity.IsAuthenticated && !context.Request.Path.StartsWithSegments("/Identity/Account/Login") && !context.Request.Path.StartsWithSegments("/Identity/Account/Register"))
+    {
+        context.Response.Redirect("/Identity/Account/Login");
+        return;
+    }
+    await next();
+});
 
 // Routing
 app.MapControllerRoute(

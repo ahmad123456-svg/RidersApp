@@ -29,5 +29,11 @@ namespace RidersApp.ViewModels
         public string CountryName { get; set; }
 
         public string CityName { get; set; }
+
+        public decimal Salary { get; set; }
+        [StringLength(20)]
+        public string Vehicle { get; set; }
+        [StringLength(30)]
+        public string VehicleNumber { get; set; }
     }
 }

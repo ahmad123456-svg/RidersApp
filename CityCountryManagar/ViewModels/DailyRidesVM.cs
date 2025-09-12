@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace RidersApp.ViewModels
@@ -24,7 +24,7 @@ namespace RidersApp.ViewModels
         public decimal Expense { get; set; }
 
         [Required]
-        [DataType(DataType.Date)]
+        [DataType(DataType.DateTime)]
         public DateTime EntryDate { get; set; }
 
         [Required]
