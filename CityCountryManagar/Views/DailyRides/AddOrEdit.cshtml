@@ -5,7 +5,7 @@
     Layout = null;
 }
 
-<form asp-action="AddOrEdit" asp-controller="DailyRides" method="post" onsubmit="return ajaxFormSubmit(this);">
+<form asp-action="AddOrEdit" asp-controller="DailyRides" method="post" class="daily-ride-form" onsubmit="return ajaxFormSubmit(this);">
     <div class="row">
         <div class="col-md-6">
             <div class="form-group">
@@ -55,7 +55,7 @@
         <div class="col-md-6">
             <div class="form-group">
                 <label asp-for="EntryDate"></label>
-                <input asp-for="EntryDate" class="form-control" type="date" />
+                <input asp-for="EntryDate" class="form-control" type="datetime-local" value="@(Model.EntryDate.ToString("yyyy-MM-ddTHH:mm"))" />
                 <span asp-validation-for="EntryDate" class="text-danger"></span>
             </div>
         </div>

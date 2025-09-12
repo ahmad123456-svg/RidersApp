@@ -100,6 +100,7 @@ namespace RidersApp.Services
                 // Use simpler formula: CreditWAT = CreditAmount * (creditPercent / 100)
                 CreditWAT = Math.Round(vm.CreditAmount * (creditPercent / 100), 2),
                 Expense = vm.Expense,
+                // Preserve the time component from the form submission
                 EntryDate = vm.EntryDate,
                 EmployeeId = vm.EmployeeId,
                 TodayRides = vm.TodayRides,
@@ -136,6 +137,7 @@ namespace RidersApp.Services
                 entity.CashAmount = vm.CashAmount;
                 entity.CashWAT = Math.Round(vm.CashAmount * (cashPercent / 100), 2);
                 entity.Expense = vm.Expense;
+                // Preserve the time component from the form submission
                 entity.EntryDate = vm.EntryDate;
                 entity.EmployeeId = vm.EmployeeId;
                 entity.TodayRides = vm.TodayRides;
