@@ -39,6 +39,25 @@
         </select>
         <span asp-validation-for="CityId" class="text-danger"></span>
     </div>
+    <div class="form-group">
+        <label asp-for="Salary"></label>
+        <input asp-for="Salary" class="form-control" />
+        <span asp-validation-for="Salary" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Vehicle"></label>
+        <select asp-for="Vehicle" class="form-control">
+            <option value="">-- Select Vehicle --</option>
+            <option value="Car">Car</option>
+            <option value="Bike">Bike</option>
+        </select>
+        <span asp-validation-for="Vehicle" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="VehicleNumber"></label>
+        <input asp-for="VehicleNumber" class="form-control" />
+        <span asp-validation-for="VehicleNumber" class="text-danger"></span>
+    </div>
 
     <input type="hidden" asp-for="EmployeeId" />
     <div class="form-group mt-2 text-end">

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -27,5 +27,10 @@ namespace RidersApp.DbModels
         public City City { get; set; }
         // Navigation for related DailyRides
         public ICollection<DailyRides> DailyRides { get; set; } = new List<DailyRides>();
+        public decimal Salary { get; set; }
+        [StringLength(20)]
+        public string Vehicle { get; set; }
+        [StringLength(30)]
+        public string VehicleNumber { get; set; }
     }
 }

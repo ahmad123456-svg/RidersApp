@@ -45,7 +45,10 @@ namespace RidersApp.Services
                     CountryId = e.CountryId,
                     CityId = e.CityId,
                     CountryName = e.Country != null ? e.Country.Name : null,
-                    CityName = e.City != null ? e.City.CityName : null
+                    CityName = e.City != null ? e.City.CityName : null,
+                    Vehicle = e.Vehicle,
+                    VehicleNumber = e.VehicleNumber,
+                    Salary = e.Salary
                 }).ToList();
         }
 
@@ -68,7 +71,10 @@ namespace RidersApp.Services
                 CountryId = employee.CountryId,
                 CityId = employee.CityId,
                 CountryName = employee.Country != null ? employee.Country.Name : null,
-                CityName = employee.City != null ? employee.City.CityName : null
+                CityName = employee.City != null ? employee.City.CityName : null,
+                Vehicle = employee.Vehicle,
+                VehicleNumber = employee.VehicleNumber,
+                Salary = employee.Salary,
             };
         }
 
@@ -81,7 +87,10 @@ namespace RidersApp.Services
                 PhoneNo = vm.PhoneNo,
                 Address = vm.Address,
                 CountryId = vm.CountryId,
-                CityId = vm.CityId
+                CityId = vm.CityId,
+                Vehicle = vm.Vehicle,
+                VehicleNumber = vm.VehicleNumber,
+                Salary = vm.Salary
             };
 
             await _employeeRepository.AddEmployee(employee);
@@ -100,6 +109,9 @@ namespace RidersApp.Services
                 employee.Address = vm.Address;
                 employee.CountryId = vm.CountryId;
                 employee.CityId = vm.CityId;
+                employee.Vehicle = vm.Vehicle;
+                employee.VehicleNumber = vm.VehicleNumber;
+                employee.Salary = vm.Salary;
 
                 await _employeeRepository.UpdateEmployee(employee);
             }

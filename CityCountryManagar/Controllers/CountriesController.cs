@@ -1,13 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using RidersApp.ViewModels;
 using RidersApp.Interfaces; // Make sure ICountryService exists here
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using RidersApp.IServices;
 using System;
+using Microsoft.AspNetCore.Authorization;
 
 namespace RidersApp.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class CountriesController : Controller
     {
         private readonly ICountryService _countryService;

@@ -10,6 +10,9 @@
             <th>Address</th>
             <th>Country</th>
             <th>City</th>
+            <th>Salary</th>
+            <th>Vehicle</th>
+            <th>Vehicle Number</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -23,6 +26,9 @@
                 <td>@item.Address</td>
                 <td>@item.CountryName</td>
                 <td>@item.CityName</td>
+                <td>@item.Salary</td>
+                <td>@item.Vehicle</td>
+                <td>@item.VehicleNumber</td>
                 <td>
                     <a onclick="showInPopup('@Url.Action("AddOrEdit", "Employees", new { id = item.EmployeeId })', 'Edit Employee')" class="btn btn-primary btn-sm text-white">Edit</a>
                     <a onclick="deleteRecord('Employees', @item.EmployeeId)" class="btn btn-danger btn-sm">Delete</a>

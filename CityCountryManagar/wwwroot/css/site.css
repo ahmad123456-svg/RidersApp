@@ -1,4 +1,4 @@
-ï»¿html {
+html {
     font-size: 14px;
 }
 
@@ -6,6 +6,10 @@
     html {
         font-size: 16px;
     }
+}
+body {
+    display: flex;
+    background: linear-gradient(90deg, lightBlue, black);
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
@@ -131,13 +135,14 @@ footer {
     align-items: center;
 }
 .btn-login {
-    background: transparent;
-    color: #111;
+  display: inline-block;
+    background: #111;
+    color: #fff;
+    padding: 8px 18px;
+    border-radius: 6px;
     text-decoration: none;
-    font-size: 12px;
-    letter-spacing: 1px;
-    padding: 6px 8px;
-    border-radius: 4px;
+    font-weight: 600;
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
 }
 .btn-login:hover {
     text-decoration: underline;
@@ -209,5 +214,175 @@ footer {
     .custom-toggler .navbar-toggler-icon {
         background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%28255,255,255,1%29' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
     }
+
+/* -----------------------
+   Login form — container1
+   ----------------------- */
+
+    /* card */
+    .container1 form {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(20, 30, 40, 0.06);
+        border: 1px solid rgba(15, 23, 42, 0.04);
+    }
+
+        /* subtle hr — make it neat */
+        .container1 form > hr {
+            border: 0;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(0,0,0,0.04), rgba(0,0,0,0));
+            margin: 0 0 0.75rem 0;
+        }
+
+    /* title */
+    .container1 h1 {
+        font-size: 1.25rem;
+        margin: 0 0 1rem 0;
+        color: #0f172a;
+        font-weight: 600;
+        letter-spacing: -0.2px;
+    }
+
+    /* floating form spacing */
+    .container1 .form-floating {
+        position: relative;
+        margin-bottom: 0.85rem;
+    }
+
+    /* inputs */
+    .container1 .form-control {
+        width: 100%;
+        height: 44px;
+        padding: 0.625rem 0.75rem;
+        font-size: 0.95rem;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.06s;
+        box-shadow: none;
+    }
+
+    /* make floating labels comfortable */
+    .container1 .form-floating .form-label {
+        position: absolute;
+        top: 10px;
+        left: 12px;
+        padding: 0 4px;
+        font-size: 0.9rem;
+        color: #6b7280;
+        pointer-events: none;
+        transition: transform 0.12s ease, font-size 0.12s ease, top 0.12s ease;
+        background: transparent;
+    }
+
+    /* when input has value or focused, push label up (works with bootstrap's floating) */
+    .container1 .form-control:focus + .form-label,
+    .container1 .form-control:not(:placeholder-shown) + .form-label {
+        transform: translateY(-12px);
+        font-size: 0.78rem;
+        color: #374151;
+        top: 2px;
+    }
+
+    /* focus state */
+    .container1 .form-control:focus {
+        border-color: #2563eb;
+        box-shadow: 0 6px 18px rgba(37,99,235,0.06);
+        outline: none;
+    }
+
+    /* validation text */
+    .container1 .text-danger,
+    .container1 span.field-validation-error {
+        color: #dc2626;
+        font-size: 0.86rem;
+        margin-top: 0.35rem;
+        display: block;
+    }
+
+    /* checkbox line */
+    .container1 .mb-3 input[type="checkbox"] {
+        margin-right: 0.5rem;
+        width: 16px;
+        height: 16px;
+        vertical-align: middle;
+    }
+
+    /* remember me (bootstrap uses .form-check classes) */
+    .container1 .checkbox {
+        margin-bottom: 0.8rem;
+    }
+
+        .container1 .checkbox label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            color: #374151;
+        }
+
+    /* primary button */
+    .container1 .btn-primary,
+    .container1 button[type="submit"] {
+        display: inline-block;
+        width: 100%;
+        padding: 0.65rem 1rem;
+        font-size: 0.98rem;
+        font-weight: 600;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        background: linear-gradient(180deg,#2563eb,#1e4fd6);
+        color: #fff;
+        box-shadow: 0 8px 24px rgba(37,99,235,0.12);
+        transition: transform 0.08s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+    }
+
+        .container1 .btn-primary:active {
+            transform: translateY(1px);
+        }
+
+        .container1 .btn-primary:focus {
+            outline: none;
+            box-shadow: 0 10px 30px rgba(37,99,235,0.18);
+        }
+
+    /* links */
+    .container1 a {
+        color: #2563eb;
+        text-decoration: none;
+        font-size: 0.92rem;
+    }
+
+        .container1 a:hover {
+            text-decoration: underline;
+        }
+
+    /* small helper text spacing */
+    .container1 form > div + div {
+        margin-top: 0.6rem;
+    }
+
+/* responsive tweaks */
+@media (max-width: 480px) {
+    .container1 form {
+        padding: 1.25rem;
+        border-radius: 10px;
+    }
+
+    .container1 h1 {
+        font-size: 1.1rem;
+    }
+
+    .container1 .form-control {
+        height: 42px;
+        font-size: 0.95rem;
+    }
+}
+
 
 

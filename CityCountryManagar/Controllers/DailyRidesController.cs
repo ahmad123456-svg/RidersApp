@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -43,7 +43,13 @@ namespace RidersApp.Controllers
             ViewBag.Employees = new SelectList(employees, "EmployeeId", "Name");
 
             if (id == 0)
-                return View(new DailyRidesVM());
+            {
+                var newRide = new DailyRidesVM
+                {
+                    EntryDate = DateTime.Now.Date // Set current date for new records
+                };
+                return View(newRide);
+            }
 
             var dailyRideVM = await _dailyRidesService.GetById(id);
             if (dailyRideVM == null) return NotFound();
@@ -59,6 +65,12 @@ namespace RidersApp.Controllers
             ModelState.Remove("UpdateDate");
             ModelState.Remove("InsertedBy");
             ModelState.Remove("UpdatedBy");
+            
+            // Ensure EntryDate has both date and time components
+            if (dailyRideVM.EntryDate.TimeOfDay.TotalSeconds == 0)
+            {
+                dailyRideVM.EntryDate = dailyRideVM.EntryDate.Date.Add(DateTime.Now.TimeOfDay);
+            }
             if (ModelState.IsValid)
             {
                 string message;
