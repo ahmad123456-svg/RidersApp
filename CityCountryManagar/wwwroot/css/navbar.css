@@ -1,0 +1,44 @@
+/* Navbar styling */
+.custom-navbar {
+    background: linear-gradient(90deg, lightBlue, black);
+    padding: 0.3rem 1.2rem;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+}
+
+.custom-navbar .navbar-brand {
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+    transition: color 0.3s ease;
+}
+
+.custom-navbar .navbar-brand:hover {
+    color: #ffc107 !important;
+}
+
+.custom-navbar .nav-link {
+    color: #f8f9fa !important;
+    font-weight: 500;
+    margin: 0 0.6rem;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    padding: 0.5rem 0.9rem;
+}
+
+.custom-navbar .nav-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffc107 !important;
+}
+
+.custom-navbar .dropdown-menu {
+    border-radius: 0.75rem;
+    box-shadow: 0px 6px 18px rgba(0,0,0,0.15);
+}
+
+/* Toggler button (mobile) */
+.custom-toggler {
+    border: none;
+}
+
+.custom-toggler .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%28255,255,255,1%29' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}

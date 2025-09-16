@@ -12,7 +12,23 @@
         </div>
     </div>
     <div id="view-all">
-        @await Html.PartialAsync("_ViewAll", new List<EmployeeVM>())
+        <table id="employeesTable" class="table table-striped table-hover datatable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Father Name</th>
+                    <th>Phone No</th>
+                    <th>Address</th>
+                    <th>Country</th>
+                    <th>City</th>
+                    <th>Salary</th>
+                    <th>Vehicle</th>
+                    <th>Vehicle Number</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
     </div>
 </div>
 
@@ -22,9 +38,49 @@
 @section Scripts {
     <script>
         $(document).ready(function() {
-            // Load employees on page load
-            $.get('@Url.Action("GetEmployees", "Employees")', function(data) {
-                $("#view-all").html(data);
+            // Initialize DataTable with server-side processing
+            $('#employeesTable').DataTable({
+                processing: true,
+                serverSide: true,
+                language: {
+                    processing: "Please wait...",
+                    search: "Search:",
+                    paginate: { previous: "Previous", next: "Next" }
+                },
+                ajax: {
+                    url: '@Url.Action("GetEmployeesData", "Employees")',
+                    type: 'POST'
+                },
+                columns: [
+                    { data: 'name' },
+                    { data: 'fatherName' },
+                    { data: 'phoneNo' },
+                    { data: 'address' },
+                    { data: 'countryName' },
+                    { data: 'cityName' },
+                    { data: 'salary' },
+                    { data: 'vehicle' },
+                    { data: 'vehicleNumber' },
+                    {
+                        data: 'employeeId',
+                        orderable: false,
+                        searchable: false,
+                        render: function (data, type, row) {
+                            return `
+                                <a class="btn btn-primary btn-sm text-white" onclick="showInPopup('@Url.Action("AddOrEdit", "Employees")?id=${data}', 'Edit Employee')">Edit</a>
+                                <a class="btn btn-danger btn-sm" onclick="deleteRecord('Employees', ${data})">Delete</a>
+                            `;
+                        }
+                    }
+                ],
+                paging: true,
+                pageLength: 25,
+                lengthChange: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                order: []
             });
         });
     </script>

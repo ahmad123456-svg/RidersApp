@@ -86,7 +86,7 @@
         <p>© 2025 - Riders App | <a href="/Home/Privacy">Privacy Policy</a></p>
     </footer>
 
-    <!-- Modal used by showInPopup (partial views loaded via AJAX) -->
+    <!-- Modal for Add/Edit forms -->
     <div class="modal fade" id="form-modal" tabindex="-1" role="dialog" aria-labelledby="formModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
             <div class="modal-content">
@@ -104,29 +104,7 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script>
-        // Helper to initialize a DataTable on a given selector with sensible defaults
-        function initDataTable(selector) {
-            if (!window.$) return;
-            $(selector).each(function () {
-                if ($.fn.DataTable.isDataTable(this)) return; // already initialized
-                $(this).DataTable({
-                    paging: true,
-                    pageLength: 25,
-                    lengthChange: true,
-                    searching: true,
-                    ordering: true,
-                    info: true,
-                    autoWidth: false,
-                    order: [], // no initial ordering
-                    language: {
-                        search: "Search:",
-                        paginate: { previous: "Previous", next: "Next" }
-                    }
-                });
-            });
-        }
-        // Auto-initialize when a page with a table loads
-        $(function () { initDataTable('.datatable'); });
+        // Per-page views initialize DataTables as needed (client or server side)
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
