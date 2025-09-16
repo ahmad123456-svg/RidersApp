@@ -16,15 +16,9 @@ namespace RidersApp.Controllers
             _service = service;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             return View();
-        }
-
-        public async Task<IActionResult> GetConfigurations()
-        {
-            var vm = await _service.GetAll();
-            return PartialView("_ViewAll", vm);
         }
 
         public async Task<IActionResult> AddOrEdit(int id = 0)
@@ -38,67 +32,112 @@ namespace RidersApp.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> GetConfigurationsData()
+        {
+            var draw = Request.Form["draw"].FirstOrDefault();
+            var start = Convert.ToInt32(Request.Form["start"].FirstOrDefault() ?? "0");
+            var length = Convert.ToInt32(Request.Form["length"].FirstOrDefault() ?? "10");
+            var searchValue = Request.Form["search[value]"].FirstOrDefault()?.Trim();
+            var sortColumnIndexString = Request.Form["order[0][column]"].FirstOrDefault();
+            var sortDirection = Request.Form["order[0][dir]"].FirstOrDefault();
+
+            int sortColumnIndex = 0;
+            int.TryParse(sortColumnIndexString, out sortColumnIndex);
+
+            string[] columnNames = new[] { "KeyName", "Value" };
+            string sortColumn = (sortColumnIndex >= 0 && sortColumnIndex < columnNames.Length)
+                ? columnNames[sortColumnIndex]
+                : columnNames[0];
+
+            var all = await _service.GetAll();
+            var query = all.AsQueryable();
+
+            var recordsTotal = query.Count();
+
+            if (!string.IsNullOrWhiteSpace(searchValue))
+            {
+                var lower = searchValue.ToLower();
+                query = query.Where(x =>
+                    (x.KeyName ?? string.Empty).ToLower().Contains(lower) ||
+                    (x.Value ?? string.Empty).ToLower().Contains(lower)
+                );
+            }
+
+            var recordsFiltered = query.Count();
+
+            bool ascending = string.Equals(sortDirection, "asc", StringComparison.OrdinalIgnoreCase);
+            query = sortColumn switch
+            {
+                "KeyName" => ascending ? query.OrderBy(x => x.KeyName) : query.OrderByDescending(x => x.KeyName),
+                "Value" => ascending ? query.OrderBy(x => x.Value) : query.OrderByDescending(x => x.Value),
+                _ => ascending ? query.OrderBy(x => x.KeyName) : query.OrderByDescending(x => x.KeyName)
+            };
+
+            var pageData = query.Skip(start).Take(length).ToList();
+
+            return Json(new
+            {
+                draw,
+                recordsTotal,
+                recordsFiltered,
+                data = pageData
+            });
+        }
+
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddOrEdit(int id, ConfigurationVM vm)
         {
             if (ModelState.IsValid)
             {
-                List<ConfigurationVM> items;
-                string message;
-
                 if (id == 0)
                 {
-                    items = await _service.Add(vm);
-                    message = "Data saved successfully";
+                    await _service.Add(vm);
+                    TempData["SuccessMessage"] = "Configuration added successfully";
                 }
                 else
                 {
-                    items = await _service.Edit(vm);
-                    message = "Data updated successfully";
+                    await _service.Edit(vm);
+                    TempData["SuccessMessage"] = "Configuration updated successfully";
                 }
 
-                return Json(new
-                {
-                    isValid = true,
-                    html = Helper.RenderRazorViewToString(this, "_ViewAll", items),
-                    message
-                });
+                return RedirectToAction("Index");
             }
 
-            return Json(new
-            {
-                isValid = false,
-                html = Helper.RenderRazorViewToString(this, "AddOrEdit", vm)
-            });
+            return View(vm);
         }
 
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
                 var config = await _service.GetById(id);
                 if (config == null)
                 {
-                    // Return the current list so client can refresh
-                    var current = await _service.GetAll();
-                    return Json(new { success = false, message = $"Configuration with ID {id} not found.", html = Helper.RenderRazorViewToString(this, "_ViewAll", current) });
+                    return Json(new { success = false, message = "Configuration not found" });
                 }
 
-                var items = await _service.Delete(id);
-
+                await _service.Delete(id);
+                
+                // Get updated list
+                var configurations = await _service.GetAll();
+                
                 return Json(new
                 {
                     success = true,
                     message = "Configuration deleted successfully",
-                    html = Helper.RenderRazorViewToString(this, "_ViewAll", items)
+                    html = Helper.RenderRazorViewToString(this, "_ViewAll", configurations)
                 });
             }
             catch (System.Exception ex)
             {
-                var current = await _service.GetAll();
-                return Json(new { success = false, message = $"Failed to delete: {ex.Message}", html = Helper.RenderRazorViewToString(this, "_ViewAll", current) });
+                return Json(new
+                {
+                    success = false,
+                    message = $"Failed to delete configuration: {ex.Message}"
+                });
             }
         }
     }

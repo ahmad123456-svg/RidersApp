@@ -54,6 +54,76 @@ namespace RidersApp.Controllers
             return PartialView("_ViewAll", vm);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> GetCitiesData()
+        {
+            // DataTables parameters
+            var draw = Request.Form["draw"].FirstOrDefault();
+            var start = Convert.ToInt32(Request.Form["start"].FirstOrDefault() ?? "0");
+            var length = Convert.ToInt32(Request.Form["length"].FirstOrDefault() ?? "10");
+            var searchValue = Request.Form["search[value]"].FirstOrDefault()?.Trim();
+            var sortColumnIndexString = Request.Form["order[0][column]"].FirstOrDefault();
+            var sortDirection = Request.Form["order[0][dir]"].FirstOrDefault(); // asc/desc
+
+            int sortColumnIndex = 0;
+            int.TryParse(sortColumnIndexString, out sortColumnIndex);
+
+            // Column mapping in the table order
+            string[] columnNames = new[] { "CityName", "PostalCode", "CountryName" };
+            string sortColumn = (sortColumnIndex >= 0 && sortColumnIndex < columnNames.Length)
+                ? columnNames[sortColumnIndex]
+                : columnNames[0];
+
+            var query = (await _cityRepository.GetAllAsync()).AsQueryable();
+
+            // Project to VM for consistent sorting/searching
+            var dataQuery = query.Select(c => new CityVM
+            {
+                CityId = c.CityId,
+                CityName = c.CityName,
+                PostalCode = c.PostalCode,
+                CountryId = c.CountryId,
+                CountryName = c.Country != null ? c.Country.Name : null
+            });
+
+            var recordsTotal = dataQuery.Count();
+
+            if (!string.IsNullOrWhiteSpace(searchValue))
+            {
+                var lower = searchValue.ToLower();
+                dataQuery = dataQuery.Where(x =>
+                    (x.CityName ?? string.Empty).ToLower().Contains(lower) ||
+                    (x.PostalCode ?? string.Empty).ToLower().Contains(lower) ||
+                    (x.CountryName ?? string.Empty).ToLower().Contains(lower)
+                );
+            }
+
+            var recordsFiltered = dataQuery.Count();
+
+            // Sorting
+            bool ascending = string.Equals(sortDirection, "asc", StringComparison.OrdinalIgnoreCase);
+            dataQuery = sortColumn switch
+            {
+                "CityName" => ascending ? dataQuery.OrderBy(x => x.CityName) : dataQuery.OrderByDescending(x => x.CityName),
+                "PostalCode" => ascending ? dataQuery.OrderBy(x => x.PostalCode) : dataQuery.OrderByDescending(x => x.PostalCode),
+                "CountryName" => ascending ? dataQuery.OrderBy(x => x.CountryName) : dataQuery.OrderByDescending(x => x.CountryName),
+                _ => ascending ? dataQuery.OrderBy(x => x.CityName) : dataQuery.OrderByDescending(x => x.CityName)
+            };
+
+            var pageData = dataQuery
+                .Skip(start)
+                .Take(length)
+                .ToList();
+
+            return Json(new
+            {
+                draw,
+                recordsTotal,
+                recordsFiltered,
+                data = pageData
+            });
+        }
+
         public async Task<IActionResult> AddOrEdit(int id = 0)
         {
             ViewBag.Countries = new SelectList(await _countryRepository.GetAllAsync(), "CountryId", "Name");
@@ -89,12 +159,12 @@ namespace RidersApp.Controllers
                 if (id == 0)
                 {
                     cities = await _cityService.Add(vm);
-                    message = "Data saved successfully";
+                    message = "City added successfully";
                 }
                 else
                 {
                     cities = await _cityService.Edit(vm);
-                    message = "Data updated successfully";
+                    message = "City updated successfully";
                 }
 
                 return Json(new

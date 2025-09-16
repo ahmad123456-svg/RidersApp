@@ -33,6 +33,72 @@ namespace RidersApp.Controllers
             return PartialView("_ViewAll", vm);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> GetEmployeesData()
+        {
+            var draw = Request.Form["draw"].FirstOrDefault();
+            var start = Convert.ToInt32(Request.Form["start"].FirstOrDefault() ?? "0");
+            var length = Convert.ToInt32(Request.Form["length"].FirstOrDefault() ?? "10");
+            var searchValue = Request.Form["search[value]"].FirstOrDefault()?.Trim();
+            var sortColumnIndexString = Request.Form["order[0][column]"].FirstOrDefault();
+            var sortDirection = Request.Form["order[0][dir]"].FirstOrDefault();
+
+            int sortColumnIndex = 0;
+            int.TryParse(sortColumnIndexString, out sortColumnIndex);
+
+            string[] columnNames = new[] { "Name", "FatherName", "PhoneNo", "Address", "CountryName", "CityName", "Salary", "Vehicle", "VehicleNumber" };
+            string sortColumn = (sortColumnIndex >= 0 && sortColumnIndex < columnNames.Length)
+                ? columnNames[sortColumnIndex]
+                : columnNames[0];
+
+            var all = await _employeeService.GetAll();
+            var query = all.AsQueryable();
+
+            var recordsTotal = query.Count();
+
+            if (!string.IsNullOrWhiteSpace(searchValue))
+            {
+                var lower = searchValue.ToLower();
+                query = query.Where(x =>
+                    (x.Name ?? string.Empty).ToLower().Contains(lower) ||
+                    (x.FatherName ?? string.Empty).ToLower().Contains(lower) ||
+                    (x.PhoneNo ?? string.Empty).ToLower().Contains(lower) ||
+                    (x.Address ?? string.Empty).ToLower().Contains(lower) ||
+                    (x.CountryName ?? string.Empty).ToLower().Contains(lower) ||
+                    (x.CityName ?? string.Empty).ToLower().Contains(lower) ||
+                    (x.Vehicle ?? string.Empty).ToLower().Contains(lower) ||
+                    (x.VehicleNumber ?? string.Empty).ToLower().Contains(lower)
+                );
+            }
+
+            var recordsFiltered = query.Count();
+
+            bool ascending = string.Equals(sortDirection, "asc", StringComparison.OrdinalIgnoreCase);
+            query = sortColumn switch
+            {
+                "Name" => ascending ? query.OrderBy(x => x.Name) : query.OrderByDescending(x => x.Name),
+                "FatherName" => ascending ? query.OrderBy(x => x.FatherName) : query.OrderByDescending(x => x.FatherName),
+                "PhoneNo" => ascending ? query.OrderBy(x => x.PhoneNo) : query.OrderByDescending(x => x.PhoneNo),
+                "Address" => ascending ? query.OrderBy(x => x.Address) : query.OrderByDescending(x => x.Address),
+                "CountryName" => ascending ? query.OrderBy(x => x.CountryName) : query.OrderByDescending(x => x.CountryName),
+                "CityName" => ascending ? query.OrderBy(x => x.CityName) : query.OrderByDescending(x => x.CityName),
+                "Salary" => ascending ? query.OrderBy(x => x.Salary) : query.OrderByDescending(x => x.Salary),
+                "Vehicle" => ascending ? query.OrderBy(x => x.Vehicle) : query.OrderByDescending(x => x.Vehicle),
+                "VehicleNumber" => ascending ? query.OrderBy(x => x.VehicleNumber) : query.OrderByDescending(x => x.VehicleNumber),
+                _ => ascending ? query.OrderBy(x => x.Name) : query.OrderByDescending(x => x.Name)
+            };
+
+            var pageData = query.Skip(start).Take(length).ToList();
+
+            return Json(new
+            {
+                draw,
+                recordsTotal,
+                recordsFiltered,
+                data = pageData
+            });
+        }
+
         public async Task<IActionResult> AddOrEdit(int id = 0)
         {
             ViewBag.Countries = new SelectList(await _countryService.GetAll(), "CountryId", "Name");

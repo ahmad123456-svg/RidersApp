@@ -19,27 +19,75 @@ namespace RidersApp.Controllers
             _countryService = countryService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             return View();
         }
 
         public async Task<IActionResult> GetCountries()
         {
-            var vm = await _countryService.GetAll();
-            return PartialView("_ViewAll", vm);
+            var countries = await _countryService.GetAll();
+            return PartialView("_ViewAll", countries);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetCountriesData()
+        {
+            var draw = Request.Form["draw"].FirstOrDefault();
+            var start = Convert.ToInt32(Request.Form["start"].FirstOrDefault() ?? "0");
+            var length = Convert.ToInt32(Request.Form["length"].FirstOrDefault() ?? "10");
+            var searchValue = Request.Form["search[value]"].FirstOrDefault()?.Trim();
+            var sortColumnIndexString = Request.Form["order[0][column]"].FirstOrDefault();
+            var sortDirection = Request.Form["order[0][dir]"].FirstOrDefault();
+
+            int sortColumnIndex = 0;
+            int.TryParse(sortColumnIndexString, out sortColumnIndex);
+
+            string[] columnNames = new[] { "Name" };
+            string sortColumn = (sortColumnIndex >= 0 && sortColumnIndex < columnNames.Length)
+                ? columnNames[sortColumnIndex]
+                : columnNames[0];
+
+            var all = await _countryService.GetAll();
+            var query = all.AsQueryable();
+
+            var recordsTotal = query.Count();
+
+            if (!string.IsNullOrWhiteSpace(searchValue))
+            {
+                var lower = searchValue.ToLower();
+                query = query.Where(x => (x.Name ?? string.Empty).ToLower().Contains(lower));
+            }
+
+            var recordsFiltered = query.Count();
+
+            bool ascending = string.Equals(sortDirection, "asc", StringComparison.OrdinalIgnoreCase);
+            query = sortColumn switch
+            {
+                "Name" => ascending ? query.OrderBy(x => x.Name) : query.OrderByDescending(x => x.Name),
+                _ => ascending ? query.OrderBy(x => x.Name) : query.OrderByDescending(x => x.Name)
+            };
+
+            var pageData = query.Skip(start).Take(length).ToList();
+
+            return Json(new
+            {
+                draw,
+                recordsTotal,
+                recordsFiltered,
+                data = pageData
+            });
         }
 
         public async Task<IActionResult> AddOrEdit(int id = 0)
         {
-
             if (id == 0)
-                return View(new CountryVM());
+                return PartialView(new CountryVM());
 
             var vm = await _countryService.GetById(id);
             if (vm == null) return NotFound();
 
-            return View(vm);
+            return PartialView(vm);
         }
 
         [HttpPost]
@@ -49,58 +97,49 @@ namespace RidersApp.Controllers
             ModelState.Remove("Cities");
             if (ModelState.IsValid)
             {
-                List<CountryVM> countries;
                 string message;
+                List<CountryVM> countries;
 
                 if (id == 0)
                 {
-                    countries = await _countryService.Add(vm);
-                    message = "Data saved successfully";
+                    await _countryService.Add(vm);
+                    message = "Country added successfully";
                 }
                 else
                 {
-                    countries = await _countryService.Edit(vm);
-                    message = "Data updated successfully";
+                    await _countryService.Edit(vm);
+                    message = "Country updated successfully";
                 }
 
+                countries = await _countryService.GetAll();
                 return Json(new
                 {
                     isValid = true,
-                    html = Helper.RenderRazorViewToString(this, "_ViewAll", countries),
-                    message
+                    message,
+                    html = Helper.RenderRazorViewToString(this, "_ViewAll", countries)
                 });
             }
 
-            return Json(new
-            {
-                isValid = false,
-                html = Helper.RenderRazorViewToString(this, "AddOrEdit", vm)
-            });
+            return PartialView(vm);
         }
 
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                // Simple delete without complex validation for now
                 var country = await _countryService.GetById(id);
                 if (country == null)
                 {
-                    return Json(new
-                    {
-                        success = false,
-                        message = $"Country with ID {id} not found."
-                    });
+                    return Json(new { success = false, message = "Country not found" });
                 }
 
-                // Direct delete from repository
                 await _countryService.Delete(id);
-
+                
                 // Get updated list
                 var countries = await _countryService.GetAll();
-
+                
                 return Json(new
                 {
                     success = true,
@@ -108,7 +147,7 @@ namespace RidersApp.Controllers
                     html = Helper.RenderRazorViewToString(this, "_ViewAll", countries)
                 });
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 return Json(new
                 {

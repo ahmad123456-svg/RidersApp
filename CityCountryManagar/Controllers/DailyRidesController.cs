@@ -37,6 +37,68 @@ namespace RidersApp.Controllers
             return PartialView("_ViewAll", dailyRidesVM);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> GetDailyRidesData()
+        {
+            var draw = Request.Form["draw"].FirstOrDefault();
+            var start = Convert.ToInt32(Request.Form["start"].FirstOrDefault() ?? "0");
+            var length = Convert.ToInt32(Request.Form["length"].FirstOrDefault() ?? "10");
+            var searchValue = Request.Form["search[value]"].FirstOrDefault()?.Trim();
+            var sortColumnIndexString = Request.Form["order[0][column]"].FirstOrDefault();
+            var sortDirection = Request.Form["order[0][dir]"].FirstOrDefault();
+
+            int sortColumnIndex = 0;
+            int.TryParse(sortColumnIndexString, out sortColumnIndex);
+
+            string[] columnNames = new[] { "EmployeeName", "EntryDate", "CreditAmount", "CreditWAT", "CashAmount", "CashWAT", "Expense", "TodayRides", "TotalRides" };
+            string sortColumn = (sortColumnIndex >= 0 && sortColumnIndex < columnNames.Length)
+                ? columnNames[sortColumnIndex]
+                : columnNames[0];
+
+            var all = await _dailyRidesService.GetAll();
+            var query = all.AsQueryable();
+
+            var recordsTotal = query.Count();
+
+            if (!string.IsNullOrWhiteSpace(searchValue))
+            {
+                var lower = searchValue.ToLower();
+                query = query.Where(x =>
+                    (x.EmployeeName ?? string.Empty).ToLower().Contains(lower)
+                    || x.EntryDate.ToString("yyyy-MM-dd").Contains(lower)
+                    || x.TodayRides.ToString().Contains(lower)
+                    || x.TotalRides.ToString().Contains(lower)
+                );
+            }
+
+            var recordsFiltered = query.Count();
+
+            bool ascending = string.Equals(sortDirection, "asc", StringComparison.OrdinalIgnoreCase);
+            query = sortColumn switch
+            {
+                "EmployeeName" => ascending ? query.OrderBy(x => x.EmployeeName) : query.OrderByDescending(x => x.EmployeeName),
+                "EntryDate" => ascending ? query.OrderBy(x => x.EntryDate) : query.OrderByDescending(x => x.EntryDate),
+                "CreditAmount" => ascending ? query.OrderBy(x => x.CreditAmount) : query.OrderByDescending(x => x.CreditAmount),
+                "CreditWAT" => ascending ? query.OrderBy(x => x.CreditWAT) : query.OrderByDescending(x => x.CreditWAT),
+                "CashAmount" => ascending ? query.OrderBy(x => x.CashAmount) : query.OrderByDescending(x => x.CashAmount),
+                "CashWAT" => ascending ? query.OrderBy(x => x.CashWAT) : query.OrderByDescending(x => x.CashWAT),
+                "Expense" => ascending ? query.OrderBy(x => x.Expense) : query.OrderByDescending(x => x.Expense),
+                "TodayRides" => ascending ? query.OrderBy(x => x.TodayRides) : query.OrderByDescending(x => x.TodayRides),
+                "TotalRides" => ascending ? query.OrderBy(x => x.TotalRides) : query.OrderByDescending(x => x.TotalRides),
+                _ => ascending ? query.OrderBy(x => x.EntryDate) : query.OrderByDescending(x => x.EntryDate)
+            };
+
+            var pageData = query.Skip(start).Take(length).ToList();
+
+            return Json(new
+            {
+                draw,
+                recordsTotal,
+                recordsFiltered,
+                data = pageData
+            });
+        }
+
         public async Task<IActionResult> AddOrEdit(int id = 0)
         {
             var employees = await _employeeService.GetAll();
