@@ -156,7 +156,9 @@ namespace RidersApp.Controllers
                 List<CityVM> cities;
                 string message;
 
-                if (id == 0)
+                // Prefer model ID; fall back to route id
+                var effectiveId = vm.CityId != 0 ? vm.CityId : id;
+                if (effectiveId == 0)
                 {
                     cities = await _cityService.Add(vm);
                     message = "City added successfully";

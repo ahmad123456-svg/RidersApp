@@ -8,10 +8,11 @@ namespace RidersApp.DbModels
         public int ConfigurationId { get; set; }
 
         [Required]
-        [StringLength(200)]
+        [StringLength(100)]
         public string KeyName { get; set; }
 
-        [StringLength(2000)]
+        [Required]
+        [StringLength(500)]
         public string Value { get; set; }
     }
 }

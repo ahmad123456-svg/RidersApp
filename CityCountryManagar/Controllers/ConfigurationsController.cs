@@ -90,21 +90,36 @@ namespace RidersApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (id == 0)
+                var effectiveId = vm.ConfigurationId != 0 ? vm.ConfigurationId : id;
+                if (effectiveId == 0)
                 {
                     await _service.Add(vm);
-                    TempData["SuccessMessage"] = "Configuration added successfully";
+                    var all = await _service.GetAll();
+                    return Json(new
+                    {
+                        isValid = true,
+                        message = "Configuration added successfully",
+                        html = Helper.RenderRazorViewToString(this, "_ViewAll", all)
+                    });
                 }
                 else
                 {
                     await _service.Edit(vm);
-                    TempData["SuccessMessage"] = "Configuration updated successfully";
+                    var all = await _service.GetAll();
+                    return Json(new
+                    {
+                        isValid = true,
+                        message = "Configuration updated successfully",
+                        html = Helper.RenderRazorViewToString(this, "_ViewAll", all)
+                    });
                 }
-
-                return RedirectToAction("Index");
             }
 
-            return View(vm);
+            return Json(new
+            {
+                isValid = false,
+                html = Helper.RenderRazorViewToString(this, "AddOrEdit", vm)
+            });
         }
 
         [HttpPost]

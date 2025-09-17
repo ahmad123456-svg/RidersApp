@@ -100,7 +100,8 @@ namespace RidersApp.Controllers
                 string message;
                 List<CountryVM> countries;
 
-                if (id == 0)
+                var effectiveId = vm.CountryId != 0 ? vm.CountryId : id;
+                if (effectiveId == 0)
                 {
                     await _countryService.Add(vm);
                     message = "Country added successfully";

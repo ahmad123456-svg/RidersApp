@@ -122,7 +122,9 @@ namespace RidersApp.Controllers
             if (ModelState.IsValid)
             {
                 string message;
-                if (id == 0)
+                // Prefer model ID; fall back to route id
+                var effectiveId = vm.EmployeeId != 0 ? vm.EmployeeId : id;
+                if (effectiveId == 0)
                 {
                     await _employeeService.Add(vm);
                     message = "Data saved successfully";

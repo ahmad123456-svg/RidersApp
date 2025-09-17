@@ -28,13 +28,13 @@ namespace RidersApp.Repositories
 
         public async Task AddAsync(Configuration config)
         {
-            _context.Configurations.Add(config);
+            await _context.Configurations.AddAsync(config); // INSERT
             await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(Configuration config)
         {
-            _context.Configurations.Update(config);
+            _context.Configurations.Update(config); // UPDATE
             await _context.SaveChangesAsync();
         }
 

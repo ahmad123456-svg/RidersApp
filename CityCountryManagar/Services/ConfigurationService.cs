@@ -26,8 +26,6 @@ namespace RidersApp.Services
             };
 
             await _repo.AddAsync(entity);
-
-            // Return configurations ordered alphabetically
             return await GetAll();
         }
 
@@ -36,12 +34,9 @@ namespace RidersApp.Services
             var entity = await _repo.GetByIdAsync(vm.ConfigurationId);
             if (entity != null)
             {
-                // Do not allow changing KeyName on edit — only update the Value
-                entity.Value = vm.Value;
+                entity.Value = vm.Value; // only update Value
                 await _repo.UpdateAsync(entity);
             }
-
-            // Return configurations ordered alphabetically
             return await GetAll();
         }
 
@@ -62,6 +57,7 @@ namespace RidersApp.Services
         {
             var entity = await _repo.GetByIdAsync(id);
             if (entity == null) return null;
+
             return new ConfigurationVM
             {
                 ConfigurationId = entity.ConfigurationId,
@@ -73,8 +69,6 @@ namespace RidersApp.Services
         public async Task<List<ConfigurationVM>> Delete(int id)
         {
             await _repo.DeleteAsync(id);
-            
-            // Return configurations ordered alphabetically
             return await GetAll();
         }
     }

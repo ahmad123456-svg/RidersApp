@@ -138,7 +138,9 @@ namespace RidersApp.Controllers
                 string message;
                 List<DailyRidesVM> allDailyRides;
 
-                if (id == 0)
+                // Prefer model ID; fall back to route id
+                var effectiveId = dailyRideVM.Id != 0 ? dailyRideVM.Id : id;
+                if (effectiveId == 0)
                 {
                     allDailyRides = await _dailyRidesService.Add(dailyRideVM);
                     message = "Data saved successfully";
