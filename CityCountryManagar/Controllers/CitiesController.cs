@@ -51,7 +51,43 @@ namespace RidersApp.Controllers
                 CountryName = c.Country != null ? c.Country.Name : null
             }).ToList();
 
-            return PartialView("_ViewAll", vm);
+        [HttpGet]
+        [Route("Cities/GetCitiesByCountry")]
+        public async Task<IActionResult> GetCitiesByCountry(int countryId)
+        {
+            try
+            {
+                Console.WriteLine($"GetCitiesByCountry called with countryId: {countryId}");
+                var cities = await _cityService.GetAll();
+                Console.WriteLine($"Total cities retrieved: {cities.Count}");
+                
+                // Debug: Show all cities and their country IDs
+                Console.WriteLine("All cities:");
+                foreach (var city in cities)
+                {
+                    Console.WriteLine($"  - {city.CityName} (CityID: {city.CityId}, CountryID: {city.CountryId})");
+                }
+                
+                var citiesByCountry = cities
+                    .Where(c => c.CountryId == countryId)
+                    .Select(c => new { cityId = c.CityId, cityName = c.CityName })
+                    .OrderBy(c => c.cityName)
+                    .ToList();
+
+                Console.WriteLine($"GetCitiesByCountry: Found {citiesByCountry.Count} cities for country ID {countryId}");
+                foreach (var city in citiesByCountry)
+                {
+                    Console.WriteLine($"  - {city.cityName} (ID: {city.cityId})");
+                }
+                
+                return Json(citiesByCountry);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"GetCitiesByCountry Error: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                return Json(new List<object>());
+            }
         }
 
         [HttpPost]
