@@ -5,7 +5,6 @@ using RidersApp.Data;
 using RidersApp.Interfaces;
 using RidersApp.DbModels;
 using System.Linq;
-using System;
 
 namespace RidersApp.Repositories
 {
@@ -20,7 +19,7 @@ namespace RidersApp.Repositories
 
         public async Task<IEnumerable<Country>> GetAllAsync()
         {
-            return await _context.Countries.ToListAsync();
+            return await _context.Countries.AsNoTracking().ToListAsync();
         }
 
         public async Task<Country> GetByIdAsync(int id)

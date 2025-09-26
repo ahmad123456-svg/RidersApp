@@ -10,5 +10,7 @@ namespace RidersApp.IServices
         Task<List<CityVM>> Add(CityVM vm);
         Task<List<CityVM>> Edit(CityVM vm);
         Task<List<CityVM>> Delete(int id);
+        Task<IEnumerable<object>> GetByCountry(int countryId);
+        Task<string?> GetById(int id);
     }
 }

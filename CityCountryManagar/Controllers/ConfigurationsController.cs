@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using RidersApp.IServices;
 using RidersApp.ViewModels;
-using RidersApp.DbModels;
 using System.Linq;
 
 namespace RidersApp.Controllers

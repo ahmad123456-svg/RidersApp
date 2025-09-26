@@ -8,6 +8,7 @@ namespace RidersApp.Interfaces
     {
         Task<IEnumerable<City>> GetAllAsync();
         Task<City> GetByIdAsync(int id);
+        Task<List<City>> GetByCountryAsync(int countryId);
         Task AddAsync(City city);
         Task UpdateAsync(City city);
         Task DeleteAsync(int id);

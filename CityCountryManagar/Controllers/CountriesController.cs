@@ -1,11 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using RidersApp.ViewModels;
-using RidersApp.Interfaces; // Make sure ICountryService exists here
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using RidersApp.IServices;
+using System.Threading.Tasks;
 using System;
 using Microsoft.AspNetCore.Authorization;
+using System.Linq;
 
 namespace RidersApp.Controllers
 {
@@ -40,8 +39,7 @@ namespace RidersApp.Controllers
             var sortColumnIndexString = Request.Form["order[0][column]"].FirstOrDefault();
             var sortDirection = Request.Form["order[0][dir]"].FirstOrDefault();
 
-            int sortColumnIndex = 0;
-            int.TryParse(sortColumnIndexString, out sortColumnIndex);
+            int.TryParse(sortColumnIndexString, out int sortColumnIndex);
 
             string[] columnNames = new[] { "Name" };
             string sortColumn = (sortColumnIndex >= 0 && sortColumnIndex < columnNames.Length)
@@ -55,8 +53,7 @@ namespace RidersApp.Controllers
 
             if (!string.IsNullOrWhiteSpace(searchValue))
             {
-                var lower = searchValue.ToLower();
-                query = query.Where(x => (x.Name ?? string.Empty).ToLower().Contains(lower));
+                query = query.Where(x => (x.Name ?? string.Empty).ToLower().Contains(searchValue.ToLower()));
             }
 
             var recordsFiltered = query.Count();
@@ -98,8 +95,6 @@ namespace RidersApp.Controllers
             if (ModelState.IsValid)
             {
                 string message;
-                List<CountryVM> countries;
-
                 var effectiveId = vm.CountryId != 0 ? vm.CountryId : id;
                 if (effectiveId == 0)
                 {
@@ -112,7 +107,7 @@ namespace RidersApp.Controllers
                     message = "Country updated successfully";
                 }
 
-                countries = await _countryService.GetAll();
+                var countries = await _countryService.GetAll();
                 return Json(new
                 {
                     isValid = true,
@@ -120,7 +115,6 @@ namespace RidersApp.Controllers
                     html = Helper.RenderRazorViewToString(this, "_ViewAll", countries)
                 });
             }
-
             return PartialView(vm);
         }
 
@@ -130,17 +124,9 @@ namespace RidersApp.Controllers
         {
             try
             {
-                var country = await _countryService.GetById(id);
-                if (country == null)
-                {
-                    return Json(new { success = false, message = "Country not found" });
-                }
-
                 await _countryService.Delete(id);
-                
-                // Get updated list
                 var countries = await _countryService.GetAll();
-                
+
                 return Json(new
                 {
                     success = true,
@@ -148,13 +134,9 @@ namespace RidersApp.Controllers
                     html = Helper.RenderRazorViewToString(this, "_ViewAll", countries)
                 });
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                return Json(new
-                {
-                    success = false,
-                    message = $"Failed to delete country: {ex.Message}"
-                });
+                return Json(new { success = false, message = ex.Message });
             }
         }
     }

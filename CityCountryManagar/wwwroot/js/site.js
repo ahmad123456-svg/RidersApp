@@ -142,3 +142,21 @@ function showErrorMessage(message) {
         });
     }, 5000);
 }
+
+$(document).ready(function () {
+    // Cascading dropdown for Employee Add/Edit
+    $(document).on('change', '#CountryId', function () {
+        var countryId = $(this).val();
+        $('#CityId').empty().append('<option value="">-- Select City --</option>');
+        if (countryId) {
+            $.getJSON('/Cities/GetCitiesByCountry', { countryId: countryId }, function (data) {
+                $.each(data, function (i, city) {
+                    $('#CityId').append($('<option>', {
+                        value: city.cityId,
+                        text: city.cityName
+                    }));
+                });
+            });
+        }
+    });
+});

@@ -5,6 +5,8 @@ using RidersApp.ViewModels;
 using System.Threading.Tasks;
 using System;
 using Microsoft.AspNetCore.Authorization;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace RidersApp.Controllers
 {
@@ -102,13 +104,28 @@ namespace RidersApp.Controllers
         public async Task<IActionResult> AddOrEdit(int id = 0)
         {
             ViewBag.Countries = new SelectList(await _countryService.GetAll(), "CountryId", "Name");
-            ViewBag.Cities = new SelectList(await _cityService.GetAll(), "CityId", "CityName");
 
             if (id == 0)
+            {
+                // For Add: do not populate cities so the city dropdown will be disabled on the client
+                ViewBag.Cities = new SelectList(Enumerable.Empty<object>(), "CityId", "CityName");
                 return View(new EmployeeVM());
+            }
 
             var vm = await _employeeService.GetById(id);
             if (vm == null) return NotFound();
+
+            // For Edit: populate cities for the employee's country so the select shows proper options
+            if (vm.CountryId > 0)
+            {
+                var cities = await _cityService.GetByCountry(vm.CountryId);
+                ViewBag.Cities = new SelectList(cities, "CityId", "CityName", vm.CityId);
+            }
+            else
+            {
+                ViewBag.Cities = new SelectList(Enumerable.Empty<object>(), "CityId", "CityName");
+            }
+
             return View(vm);
         }
 
@@ -122,7 +139,6 @@ namespace RidersApp.Controllers
             if (ModelState.IsValid)
             {
                 string message;
-                // Prefer model ID; fall back to route id
                 var effectiveId = vm.EmployeeId != 0 ? vm.EmployeeId : id;
                 if (effectiveId == 0)
                 {
@@ -145,7 +161,18 @@ namespace RidersApp.Controllers
             }
 
             ViewBag.Countries = new SelectList(await _countryService.GetAll(), "CountryId", "Name");
-            ViewBag.Cities = new SelectList(await _cityService.GetAll(), "CityId", "CityName");
+
+            // When validation fails, populate city list only for the selected country (if any)
+            if (vm.CountryId > 0)
+            {
+                var cities = await _cityService.GetByCountry(vm.CountryId);
+                ViewBag.Cities = new SelectList(cities, "CityId", "CityName", vm.CityId);
+            }
+            else
+            {
+                ViewBag.Cities = new SelectList(Enumerable.Empty<object>(), "CityId", "CityName");
+            }
+
             return Json(new
             {
                 isValid = false,
@@ -169,7 +196,6 @@ namespace RidersApp.Controllers
             }
             catch (Exception ex)
             {
-                // Log the error (implement proper logging here if needed)
                 return Json(new
                 {
                     success = false,

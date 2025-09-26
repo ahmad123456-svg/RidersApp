@@ -1,11 +1,10 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using RidersApp.Data;
-using RidersApp.Interfaces;
 using RidersApp.DbModels;
+using RidersApp.Interfaces;
 using System.Linq;
-using System;
 
 namespace RidersApp.Repositories
 {
@@ -20,12 +19,23 @@ namespace RidersApp.Repositories
 
         public async Task<IEnumerable<City>> GetAllAsync()
         {
-            return await _context.Cities.Include(c => c.Country).ToListAsync();
+            return await _context.Cities
+                .Include(c => c.Country)
+                .ToListAsync();
         }
 
         public async Task<City> GetByIdAsync(int id)
         {
-            return await _context.Cities.Include(c => c.Country).FirstOrDefaultAsync(c => c.CityId == id);
+            return await _context.Cities
+                .Include(c => c.Country)
+                .FirstOrDefaultAsync(c => c.CityId == id);
+        }
+
+        public async Task<List<City>> GetByCountryAsync(int countryId)
+        {
+            return await _context.Cities
+                .Where(c => c.CountryId == countryId)
+                .ToListAsync();
         }
 
         public async Task AddAsync(City city)
@@ -60,4 +70,5 @@ namespace RidersApp.Repositories
             return await _context.Employees.AnyAsync(e => e.CityId == cityId);
         }
     }
+
 }

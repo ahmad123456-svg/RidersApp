@@ -6,6 +6,7 @@
 }
 
 <form asp-action="AddOrEdit" asp-controller="DailyRides" method="post" class="daily-ride-form" onsubmit="return ajaxFormSubmit(this);">
+
     <div class="row">
         <div class="col-md-6">
             <div class="form-group">
@@ -14,18 +15,6 @@
                 <span asp-validation-for="CreditAmount" class="text-danger"></span>
             </div>
         </div>
-    @* CreditWAT is calculated from CreditAmount and configuration; user should not enter it *@
-    </div>
-    <div class="row">
-        <div class="col-md-6">
-            <div class="form-group">
-                <label asp-for="CreditWAT"></label>
-                <input asp-for="CreditWAT" class="form-control" type="text" readonly />
-                <span asp-validation-for="CreditWAT" class="text-danger"></span>
-            </div>
-        </div>
-    </div>
-    <div class="row">
         <div class="col-md-6">
             <div class="form-group">
                 <label asp-for="CashAmount"></label>
@@ -33,17 +22,8 @@
                 <span asp-validation-for="CashAmount" class="text-danger"></span>
             </div>
         </div>
-    @* CashWAT is calculated from CashAmount and configuration; user should not enter it *@
     </div>
-    <div class="row">
-        <div class="col-md-6">
-            <div class="form-group">
-                <label asp-for="CashWAT"></label>
-                <input asp-for="CashWAT" class="form-control" type="text" readonly />
-                <span asp-validation-for="CashWAT" class="text-danger"></span>
-            </div>
-        </div>
-    </div>
+
     <div class="row">
         <div class="col-md-6">
             <div class="form-group">
@@ -60,6 +40,7 @@
             </div>
         </div>
     </div>
+
     <div class="row">
         <div class="col-md-6">
             <div class="form-group">
@@ -76,6 +57,7 @@
             </div>
         </div>
     </div>
+
     <div class="row">
         <div class="col-md-6">
             <div class="form-group">
@@ -92,6 +74,7 @@
             </div>
         </div>
     </div>
+
     <div class="row">
         <div class="col-md-6">
             <div class="form-group">
@@ -102,7 +85,7 @@
         </div>
         <div class="col-md-6">
             <div class="form-group">
-                <label asp-for="EmployeeId" class="control-label"></label>
+                <label asp-for="EmployeeId"></label>
                 <select asp-for="EmployeeId" class="form-control" asp-items="ViewBag.Employees">
                     <option value="">-- Select Employee --</option>
                 </select>
@@ -118,5 +101,7 @@
 </form>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

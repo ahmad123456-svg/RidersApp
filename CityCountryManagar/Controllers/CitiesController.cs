@@ -1,155 +1,101 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using RidersApp.Data;
-using RidersApp.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using RidersApp.DbModels;
 using RidersApp.ViewModels;
 using RidersApp.IServices;
-using System.Linq;
-using System.Collections.Generic;
-using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
+using System;
 
 namespace RidersApp.Controllers
 {
     [Authorize(Roles = "Admin")]
     public class CitiesController : Controller
     {
-        private readonly ICityRepository _cityRepository;
-        private readonly ICountryRepository _countryRepository;
         private readonly ICityService _cityService;
-        private readonly ApplicationDbContext _context;
+        private readonly ICountryService _countryService;
 
-        public CitiesController(
-            ICityRepository cityRepository,
-            ICountryRepository countryRepository,
-            ICityService cityService,
-            ApplicationDbContext context)
+        public CitiesController(ICityService cityService, ICountryService countryService)
         {
-            _cityRepository = cityRepository;
-            _countryRepository = countryRepository;
             _cityService = cityService;
-            _context = context;
+            _countryService = countryService;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             return View();
         }
 
         public async Task<IActionResult> GetCities()
         {
-            var cities = await _cityRepository.GetAllAsync();
-            var vm = cities.Select(c => new CityVM
-            {
-                CityId = c.CityId,
-                CityName = c.CityName,
-                PostalCode = c.PostalCode,
-                CountryId = c.CountryId,
-                CountryName = c.Country != null ? c.Country.Name : null
-            }).ToList();
-
-        [HttpGet]
-        [Route("Cities/GetCitiesByCountry")]
-        public async Task<IActionResult> GetCitiesByCountry(int countryId)
-        {
-            try
-            {
-                Console.WriteLine($"GetCitiesByCountry called with countryId: {countryId}");
-                var cities = await _cityService.GetAll();
-                Console.WriteLine($"Total cities retrieved: {cities.Count}");
-                
-                // Debug: Show all cities and their country IDs
-                Console.WriteLine("All cities:");
-                foreach (var city in cities)
-                {
-                    Console.WriteLine($"  - {city.CityName} (CityID: {city.CityId}, CountryID: {city.CountryId})");
-                }
-                
-                var citiesByCountry = cities
-                    .Where(c => c.CountryId == countryId)
-                    .Select(c => new { cityId = c.CityId, cityName = c.CityName })
-                    .OrderBy(c => c.cityName)
-                    .ToList();
-
-                Console.WriteLine($"GetCitiesByCountry: Found {citiesByCountry.Count} cities for country ID {countryId}");
-                foreach (var city in citiesByCountry)
-                {
-                    Console.WriteLine($"  - {city.cityName} (ID: {city.cityId})");
-                }
-                
-                return Json(citiesByCountry);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"GetCitiesByCountry Error: {ex.Message}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
-                return Json(new List<object>());
-            }
+            var cities = await _cityService.GetAll();
+            return PartialView("_ViewAll", cities);
         }
 
+        /// <summary>
+        /// API for dependent dropdown (returns cities of a country in JSON).
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetCitiesByCountry(int countryId)
+        {
+            if (countryId <= 0)
+                return Json(Enumerable.Empty<object>());
+
+            // Fix: Cast to the correct type instead of object
+            var cities = await _cityService.GetByCountry(countryId);
+            var result = cities.Cast<dynamic>().Select(c => new
+            {
+                cityId = c.CityId,
+                cityName = c.CityName
+            });
+
+            return Json(result);
+        }
+
+        // DataTables
         [HttpPost]
         public async Task<IActionResult> GetCitiesData()
         {
-            // DataTables parameters
             var draw = Request.Form["draw"].FirstOrDefault();
             var start = Convert.ToInt32(Request.Form["start"].FirstOrDefault() ?? "0");
             var length = Convert.ToInt32(Request.Form["length"].FirstOrDefault() ?? "10");
             var searchValue = Request.Form["search[value]"].FirstOrDefault()?.Trim();
             var sortColumnIndexString = Request.Form["order[0][column]"].FirstOrDefault();
-            var sortDirection = Request.Form["order[0][dir]"].FirstOrDefault(); // asc/desc
+            var sortDirection = Request.Form["order[0][dir]"].FirstOrDefault();
 
-            int sortColumnIndex = 0;
-            int.TryParse(sortColumnIndexString, out sortColumnIndex);
-
-            // Column mapping in the table order
-            string[] columnNames = new[] { "CityName", "PostalCode", "CountryName" };
+            int.TryParse(sortColumnIndexString, out int sortColumnIndex);
+            string[] columnNames = { "CityName", "PostalCode", "CountryName" };
             string sortColumn = (sortColumnIndex >= 0 && sortColumnIndex < columnNames.Length)
                 ? columnNames[sortColumnIndex]
-                : columnNames[0];
+                : "CityName";
 
-            var query = (await _cityRepository.GetAllAsync()).AsQueryable();
+            var cities = await _cityService.GetAll();
+            var query = cities.AsQueryable();
 
-            // Project to VM for consistent sorting/searching
-            var dataQuery = query.Select(c => new CityVM
-            {
-                CityId = c.CityId,
-                CityName = c.CityName,
-                PostalCode = c.PostalCode,
-                CountryId = c.CountryId,
-                CountryName = c.Country != null ? c.Country.Name : null
-            });
-
-            var recordsTotal = dataQuery.Count();
+            var recordsTotal = query.Count();
 
             if (!string.IsNullOrWhiteSpace(searchValue))
             {
                 var lower = searchValue.ToLower();
-                dataQuery = dataQuery.Where(x =>
-                    (x.CityName ?? string.Empty).ToLower().Contains(lower) ||
-                    (x.PostalCode ?? string.Empty).ToLower().Contains(lower) ||
-                    (x.CountryName ?? string.Empty).ToLower().Contains(lower)
-                );
+                query = query.Where(x =>
+                    (x.CityName ?? "").ToLower().Contains(lower) ||
+                    (x.PostalCode ?? "").ToLower().Contains(lower) ||
+                    (x.CountryName ?? "").ToLower().Contains(lower));
             }
 
-            var recordsFiltered = dataQuery.Count();
-
-            // Sorting
+            var recordsFiltered = query.Count();
             bool ascending = string.Equals(sortDirection, "asc", StringComparison.OrdinalIgnoreCase);
-            dataQuery = sortColumn switch
+
+            query = sortColumn switch
             {
-                "CityName" => ascending ? dataQuery.OrderBy(x => x.CityName) : dataQuery.OrderByDescending(x => x.CityName),
-                "PostalCode" => ascending ? dataQuery.OrderBy(x => x.PostalCode) : dataQuery.OrderByDescending(x => x.PostalCode),
-                "CountryName" => ascending ? dataQuery.OrderBy(x => x.CountryName) : dataQuery.OrderByDescending(x => x.CountryName),
-                _ => ascending ? dataQuery.OrderBy(x => x.CityName) : dataQuery.OrderByDescending(x => x.CityName)
+                "CityName" => ascending ? query.OrderBy(x => x.CityName) : query.OrderByDescending(x => x.CityName),
+                "PostalCode" => ascending ? query.OrderBy(x => x.PostalCode) : query.OrderByDescending(x => x.PostalCode),
+                "CountryName" => ascending ? query.OrderBy(x => x.CountryName) : query.OrderByDescending(x => x.CountryName),
+                _ => ascending ? query.OrderBy(x => x.CityName) : query.OrderByDescending(x => x.CityName)
             };
 
-            var pageData = dataQuery
-                .Skip(start)
-                .Take(length)
-                .ToList();
+            var pageData = query.Skip(start).Take(length).ToList();
 
             return Json(new
             {
@@ -160,24 +106,16 @@ namespace RidersApp.Controllers
             });
         }
 
+        // Add or Edit
         public async Task<IActionResult> AddOrEdit(int id = 0)
         {
-            ViewBag.Countries = new SelectList(await _countryRepository.GetAllAsync(), "CountryId", "Name");
+            ViewBag.Countries = new SelectList(await _countryService.GetAll(), "CountryId", "Name");
 
             if (id == 0)
                 return View(new CityVM());
 
-            var city = await _cityRepository.GetByIdAsync(id);
-            if (city == null) return NotFound();
-
-            var vm = new CityVM
-            {
-                CityId = city.CityId,
-                CityName = city.CityName,
-                PostalCode = city.PostalCode,
-                CountryId = city.CountryId,
-                CountryName = city.Country?.Name
-            };
+            var vm = await _cityService.GetById(id);
+            if (vm == null) return NotFound();
 
             return View(vm);
         }
@@ -192,9 +130,7 @@ namespace RidersApp.Controllers
                 List<CityVM> cities;
                 string message;
 
-                // Prefer model ID; fall back to route id
-                var effectiveId = vm.CityId != 0 ? vm.CityId : id;
-                if (effectiveId == 0)
+                if (vm.CityId == 0)
                 {
                     cities = await _cityService.Add(vm);
                     message = "City added successfully";
@@ -213,8 +149,7 @@ namespace RidersApp.Controllers
                 });
             }
 
-            // Repopulate dropdown on error
-            ViewBag.Countries = new SelectList(await _countryRepository.GetAllAsync(), "CountryId", "Name");
+            ViewBag.Countries = new SelectList(await _countryService.GetAll(), "CountryId", "Name");
             return PartialView(vm);
         }
 
@@ -224,41 +159,12 @@ namespace RidersApp.Controllers
         {
             try
             {
-                var city = await _context.Cities
-                    .Include(c => c.Employees) // check if employees exist
-                    .FirstOrDefaultAsync(c => c.CityId == id);
-
-                if (city == null)
-                    return Json(new { success = false, message = "City not found" });
-
-                if (city.Employees != null && city.Employees.Any())
-                {
-                    return Json(new
-                    {
-                        success = false,
-                        message = "Cannot delete city because employees are linked to it."
-                    });
-                }
-
-                _context.Cities.Remove(city);
-                await _context.SaveChangesAsync();
-
-                // reload updated city list
-                var cities = await _context.Cities.Include(c => c.Country).ToListAsync();
-                var vm = cities.Select(c => new CityVM
-                {
-                    CityId = c.CityId,
-                    CityName = c.CityName,
-                    PostalCode = c.PostalCode,
-                    CountryId = c.CountryId,
-                    CountryName = c.Country?.Name
-                }).ToList();
-
+                var cities = await _cityService.Delete(id);
                 return Json(new
                 {
                     success = true,
                     message = "City deleted successfully",
-                    html = Helper.RenderRazorViewToString(this, "_ViewAll", vm)
+                    html = Helper.RenderRazorViewToString(this, "_ViewAll", cities)
                 });
             }
             catch (Exception ex)
@@ -266,7 +172,7 @@ namespace RidersApp.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = $"Failed to delete city: {ex.InnerException?.Message ?? ex.Message}"
+                    message = ex.Message
                 });
             }
         }

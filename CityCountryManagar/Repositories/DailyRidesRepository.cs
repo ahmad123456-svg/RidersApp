@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using RidersApp.Data;
 using RidersApp.DbModels;
 using RidersApp.Interfaces;
-using System;
 
 namespace RidersApp.Repositories
 {
@@ -33,23 +32,22 @@ namespace RidersApp.Repositories
 
         public async Task AddAsync(DailyRides dailyRides)
         {
-            _context.DailyRides.Add(dailyRides);
+            await _context.DailyRides.AddAsync(dailyRides);
             await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(DailyRides dailyRides)
         {
-
             _context.DailyRides.Update(dailyRides);
             await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(int id)
         {
-            var dailyRides = await _context.DailyRides.FindAsync(id);
-            if (dailyRides != null)
+            var dailyRide = await _context.DailyRides.FindAsync(id);
+            if (dailyRide != null)
             {
-                _context.DailyRides.Remove(dailyRides);
+                _context.DailyRides.Remove(dailyRide);
                 await _context.SaveChangesAsync();
             }
         }

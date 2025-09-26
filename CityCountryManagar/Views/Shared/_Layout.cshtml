@@ -11,69 +11,81 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
     <link rel="stylesheet" href="//cdn.datatables.net/2.3.3/css/dataTables.dataTables.min.css" />
     <style>
-        body { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
-        table.dataTable thead th { background: #f8f9fa; }
-        table.dataTable { width: 100% !important; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+        }
+
+        table.dataTable thead th {
+            background: #f8f9fa;
+        }
+
+        table.dataTable {
+            width: 100% !important;
+        }
     </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-lg custom-navbar">
-            <div class="container-fluid">
-                <a class="navbar-brand fw-bold text-light" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-bicycle"></i> Riders App
-                </a>
-                <button class="navbar-toggler custom-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+        @* ✅ Hide navbar on Login and Register pages *@
+        @if (!(Context.Request.Path.Value.Contains("/Account/Login")
+                || Context.Request.Path.Value.Contains("/Account/Register")))
+        {
+            <nav class="navbar navbar-expand-lg custom-navbar">
+                <div class="container-fluid">
+                    <a class="navbar-brand fw-bold text-light" asp-area="" asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-bicycle"></i> Riders App
+                    </a>
+                    <button class="navbar-toggler custom-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
 
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    @if (User.Identity.IsAuthenticated)
-                    {
-                        <ul class="navbar-nav ms-auto">
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Cities" asp-action="Index">Cities</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Countries" asp-action="Index">Countries</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Employees" asp-action="Index">Employees</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="DailyRides" asp-action="Index">Daily Rides</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Configurations" asp-action="Index">Configurations</a>
-                            </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="settingsDropdown" role="button"
-                                   data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-gear"></i> Settings
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="settingsDropdown">
-                                
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><partial name="_LoginPartial" /></li>
-                                </ul>
-                            </li>
-                        </ul>
-                    }
-                    else
-                    {
-                        <ul class="navbar-nav ms-auto">
-                            <li class="nav-item">
-                                <partial name="_LoginPartial" />
-                            </li>
-                        </ul>
-                    }
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <ul class="navbar-nav ms-auto">
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Cities" asp-action="Index">Cities</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Countries" asp-action="Index">Countries</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Employees" asp-action="Index">Employees</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="DailyRides" asp-action="Index">Daily Rides</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Configurations" asp-action="Index">Configurations</a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="settingsDropdown" role="button"
+                                       data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-gear"></i> Settings
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="settingsDropdown">
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><partial name="_LoginPartial" /></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        }
+                        else
+                        {
+                            <ul class="navbar-nav ms-auto">
+                                <li class="nav-item">
+                                    <partial name="_LoginPartial" />
+                                </li>
+                            </ul>
+                        }
+                    </div>
                 </div>
-            </div>
-        </nav>
+            </nav>
+        }
     </header>
 
     <div class="container my-4">
@@ -104,8 +116,7 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script>
-        // Per-page views initialize DataTables as needed (client or server side)// 
-        // Per-page views initialize DataTables as needed (client or server side)// 
+        // Per-page views initialize DataTables as needed (client or server side)
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

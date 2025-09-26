@@ -1,6 +1,6 @@
 html {
     font-size: 14px;
-}
+}eaarch
 
 @media (min-width: 768px) {
     html {
@@ -12,7 +12,7 @@ html {
     box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
-html { 
+html {
     position: relative;
     min-height: 100%;
 }
@@ -22,12 +22,14 @@ body {
     font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+.form-floating > .form-control-plaintext::placeholder,
+.form-floating > .form-control::placeholder {
     color: var(--bs-secondary-color);
     text-align: end;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+.form-floating > .form-control-plaintext:focus::placeholder,
+.form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
 
@@ -53,6 +55,7 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    background: linear-gradient(90deg, lightBlue, black);
 }
 
 .main-content {
@@ -67,15 +70,15 @@ footer {
     font-size: 14px;
 }
 
-footer a {
-    color: #4ea8ff;
-    text-decoration: none;
-    margin-left: 4px;
-}
+    footer a {
+        color: #4ea8ff;
+        text-decoration: none;
+        margin-left: 4px;
+    }
 
-footer a:hover {
-    text-decoration: underline;
-}
+        footer a:hover {
+            text-decoration: underline;
+        }
 
 /* Loader Styles */
 .loader {
@@ -96,6 +99,7 @@ footer a:hover {
     from {
         transform: rotate(0deg);
     }
+
     to {
         transform: rotate(360deg);
     }
@@ -112,8 +116,11 @@ footer a:hover {
     gap: 12px;
     align-items: center;
 }
-
-.btn-login {
+label {
+    display: inline-block;
+    color: white;
+}
+    .btn-login {
     display: inline-block;
     background: #111;
     color: #fff;
@@ -122,12 +129,14 @@ footer a:hover {
     text-decoration: none;
     font-weight: 600;
     box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
+    transition: 0.3s ease-in-out;
 }
 
-.btn-login:hover {
-    text-decoration: underline;
-}
+    .btn-login:hover {
+        text-decoration: underline;
+    }
 
+/* Signup button */
 .btn-signup {
     display: inline-block;
     background: #111;
@@ -139,9 +148,9 @@ footer a:hover {
     box-shadow: 0 6px 0 rgba(0,0,0,0.15);
 }
 
-.btn-signup:hover {
-    opacity: 0.95;
-}
+    .btn-signup:hover {
+        opacity: 0.95;
+    }
 
 /* Auth page image */
 .img-auth {
@@ -151,7 +160,7 @@ footer a:hover {
     border-radius: 8px;
 }
 
-/* Login page specific styles */
+/* ================= Login Page ================= */
 .login-page {
     display: flex;
     justify-content: center;
@@ -161,23 +170,26 @@ footer a:hover {
     background: linear-gradient(90deg, lightBlue, black);
 }
 
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.login-card,
 .login-page .container1 form {
     width: 100%;
-    max-width: 420px;
-    background: #ffffff;
+    max-width: 459px;
+    background: white;
     padding: 2rem;
     border-radius: 12px;
     box-shadow: 0 8px 30px rgba(20, 30, 40, 0.06);
     border: 1px solid rgba(15, 23, 42, 0.04);
+    text-align: center;
 }
 
-.login-page .container1 form > hr {
-    border: 0;
-    height: 1px;
-    background: linear-gradient(90deg, rgba(0,0,0,0.04), rgba(0,0,0,0));
-    margin: 0 0 0.75rem 0;
-}
-
+.login-title,
 .login-page .container1 h1 {
     font-size: 1.25rem;
     margin: 0 0 1rem 0;
@@ -186,34 +198,37 @@ footer a:hover {
     letter-spacing: -0.2px;
 }
 
+.input-group,
 .login-page .container1 .form-floating {
+    margin-bottom: 1rem;
     position: relative;
-    margin-bottom: 0.85rem;
 }
 
-.login-page .container1 .form-control {
-    width: 100%;
-    height: 44px;
-    padding: 0.625rem 0.75rem;
-    font-size: 0.95rem;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    background: #fff;
-    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.06s;
-    box-shadow: none;
-}
+    .input-group input,
+    .login-page .container1 .form-control {
+        width: 100%;
+        height: 44px;
+        padding: 0.625rem 0.75rem;
+        font-size: 0.95rem;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease;
+        box-shadow: none;
+        outline: none;
+    }
 
-.login-page .container1 .form-floating .form-label {
-    position: absolute;
-    top: 10px;
-    left: 12px;
-    padding: 0 4px;
-    font-size: 0.9rem;
-    color: #6b7280;
-    pointer-events: none;
-    transition: transform 0.12s ease, font-size 0.12s ease, top 0.12s ease;
-    background: transparent;
-}
+    /* Floating label */
+    .login-page .container1 .form-floating .form-label {
+        position: absolute;
+        top: 10px;
+        left: 12px;
+        padding: 0 4px;
+        font-size: 0.9rem;
+        color: #6b7280;
+        pointer-events: none;
+        transition: transform 0.12s ease, font-size 0.12s ease, top 0.12s ease;
+    }
 
 .login-page .container1 .form-control:focus + .form-label,
 .login-page .container1 .form-control:not(:placeholder-shown) + .form-label {
@@ -226,9 +241,48 @@ footer a:hover {
 .login-page .container1 .form-control:focus {
     border-color: #2563eb;
     box-shadow: 0 6px 18px rgba(37,99,235,0.06);
-    outline: none;
 }
 
+/* Checkbox */
+.checkbox-container {
+    text-align: left;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+/* Login Button override */
+.login-card .btn-login,
+.login-page .container1 button[type=submit] {
+    background: #8e2de2;
+    color: #fff;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    width: 100%;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+    .login-card .btn-login:hover,
+    .login-page .container1 button[type=submit]:hover {
+        background: #4a00e0;
+    }
+
+/* Links below form */
+.links {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+    .links a {
+        font-size: 13px;
+        text-decoration: none;
+        color: #4a00e0;
+    }
+
+/* Error message */
 .login-page .container1 .text-danger,
 .login-page .container1 span.field-validation-error {
     font-size: 0.8rem;
@@ -237,12 +291,12 @@ footer a:hover {
 }
 
 /* DataTable styles */
-table.dataTable thead th { 
-    background: #f8f9fa; 
+table.dataTable thead th {
+    background: #f8f9fa;
 }
 
-table.dataTable { 
-    width: 100% !important; 
+table.dataTable {
+    width: 100% !important;
 }
 
 /* Modal improvements */
@@ -265,10 +319,10 @@ table.dataTable {
     transition: border-color 0.2s ease;
 }
 
-.form-control:focus {
-    border-color: #6a11cb;
-    box-shadow: 0 0 0 0.2rem rgba(106, 17, 203, 0.25);
-}
+    .form-control:focus {
+        border-color: #6a11cb;
+        box-shadow: 0 0 0 0.2rem rgba(106, 17, 203, 0.25);
+    }
 
 /* Button improvements */
 .btn {
@@ -282,27 +336,27 @@ table.dataTable {
     border-color: #28a745;
 }
 
-.btn-success:hover {
-    background-color: #218838;
-    border-color: #1e7e34;
-}
+    .btn-success:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+    }
 
 .btn-primary {
     background-color: #007bff;
     border-color: #007bff;
 }
 
-.btn-primary:hover {
-    background-color: #0069d9;
-    border-color: #0062cc;
-}
+    .btn-primary:hover {
+        background-color: #0069d9;
+        border-color: #0062cc;
+    }
 
 .btn-danger {
     background-color: #dc3545;
     border-color: #dc3545;
 }
 
-.btn-danger:hover {
-    background-color: #c82333;
-    border-color: #bd2130;
-}
+    .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+    }

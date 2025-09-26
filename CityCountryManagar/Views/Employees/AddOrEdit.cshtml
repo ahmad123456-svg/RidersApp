@@ -1,7 +1,10 @@
 @using RidersApp.ViewModels
+@using Microsoft.AspNetCore.Mvc.Rendering
 @model EmployeeVM
 @{
     Layout = null; 
+    var cityItems = ViewBag.Cities as IEnumerable<SelectListItem>;
+    bool cityHasItems = cityItems != null && cityItems.Any();
 }
 
 <form asp-action="AddOrEdit" asp-controller="Employees" method="post" onsubmit="return ajaxFormSubmit(this);">
@@ -27,14 +30,15 @@
     </div>
     <div class="form-group">
         <label asp-for="CountryId" class="control-label"></label>
-        <select asp-for="CountryId" class="form-control" asp-items="ViewBag.Countries">
+        <select asp-for="CountryId" class="form-control" asp-items="ViewBag.Countries" id="CountryId">
             <option value="">-- Select Country --</option>
         </select>
         <span asp-validation-for="CountryId" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="CityId" class="control-label"></label>
-        <select asp-for="CityId" class="form-control" asp-items="ViewBag.Cities">
+        <!-- do not inject C# into tag attributes to avoid RZ1031 -->
+        <select asp-for="CityId" class="form-control" asp-items="ViewBag.Cities" id="CityId">
             <option value="">-- Select City --</option>
         </select>
         <span asp-validation-for="CityId" class="text-danger"></span>
@@ -67,4 +71,49 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function () {
+            // server-provided flag
+            var cityHasItems = @((cityHasItems) ? "true" : "false");
+
+            // set initial disabled state based on server-provided cities
+            $('#CityId').prop('disabled', cityHasItems === "false");
+
+            $('#CountryId').change(function () {
+                var countryId = $(this).val();
+                var $city = $('#CityId');
+                $city.empty();
+
+                if (!countryId) {
+                    $city.append('<option value="">-- Select City --</option>');
+                    $city.prop('disabled', true);
+                    return;
+                }
+
+                $.getJSON('/Cities/GetCitiesByCountry', { countryId: countryId }, function (data) {
+                    if (data && data.length > 0) {
+                        $city.append('<option value="">-- Select City --</option>');
+                        $.each(data, function (i, city) {
+                            $city.append($('<option>', {
+                                value: city.cityId,
+                                text: city.cityName
+                            }));
+                        });
+                        $city.prop('disabled', false);
+                    } else {
+                        $city.append('<option value="">No cities present</option>');
+                        $city.prop('disabled', true);
+                    }
+                }).fail(function () {
+                    $city.append('<option value="">No cities present</option>');
+                    $city.prop('disabled', true);
+                });
+            });
+
+            // If there's an initial country but empty cities, trigger change to attempt load
+            if ($('#CountryId').val() && !cityHasItems) {
+                $('#CountryId').trigger('change');
+            }
+        });
+    </script>
 }

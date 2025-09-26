@@ -2,65 +2,50 @@
 @model LoginModel
 
 @{
-    ViewData["Title"] = "Log in";
-
+    ViewData["Title"] = "Sign In";
 }
 
-@* <div class="row"> *@
-    <div class="col-md-12">
-        <section>
-            <div class="container1">
-            <form id="account" method="post">
+<link rel="stylesheet" href="~/css/login.css" />
 
-                <hr /><h1>@ViewData["Title"]</h1>
-                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                    <label asp-for="Input.Email" class="form-label">Email</label>
-                    <span asp-validation-for="Input.Email" class="text-danger"></span>
-                </div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Password" class="form-control"
-                           autocomplete="current-password" aria-required="true"
-                           placeholder="password" id="passwordInput" />
-                    <label asp-for="Input.Password" class="form-label">Password</label>
-                    <span asp-validation-for="Input.Password" class="text-danger"></span>
-                </div>
+<div class="login-container">
+    <div class="login-card">
+        <h2 class="login-title">Sign In</h2>
+        <form id="account" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
 
-                <!-- ✅ Show Password checkbox added -->
-                <div class="mb-3">
-                    <input type="checkbox" id="showPassword" />
-                    <label for="showPassword">Show Password</label>
-                </div>
-
-                <div class="checkbox mb-3">
-                    <label asp-for="Input.RememberMe" class="form-label">
-                        <input class="form-check-input" asp-for="Input.RememberMe" />
-                        @Html.DisplayNameFor(m => m.Input.RememberMe)
-                    </label>
-                </div>
-                <div>
-                    <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
-                </div>
-                <div>
-                    <p>
-                        <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
-                    </p>
-                    <p>
-                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
-                    </p>
-
-                </div>
-            </form>
+            <!-- Email -->
+            <div class="input-group">
+                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="Username or Email" />
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
             </div>
-        </section>
-    </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <!-- Auth page image: place your image at wwwroot/images/auth-graphic.png -->
 
+            <!-- Password -->
+            <div class="input-group">
+                <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Password" id="passwordInput" />
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
 
+            <!-- Show Password -->
+            <div class="checkbox-container">
+                <input type="checkbox" id="showPassword" />
+                <label for="showPassword">Show Password</label>
+            </div>
 
+            <!-- Remember Me -->
+            <div class="checkbox-container">
+                <input class="form-check-input" asp-for="Input.RememberMe" />
+                <label asp-for="Input.RememberMe">@Html.DisplayNameFor(m => m.Input.RememberMe)</label>
+            </div>
+
+            <!-- Submit -->
+            <button id="login-submit" type="submit" class="btn-login">Sign In</button>
+
+            <!-- Links -->
+            <div class="links">
+                <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
+                <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Sign up</a>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -69,11 +54,7 @@
     <script>
         document.getElementById("showPassword").addEventListener("change", function () {
             var passwordInput = document.getElementById("passwordInput");
-            if (this.checked) {
-                passwordInput.type = "text";
-            } else {
-                passwordInput.type = "password";
-            }
+            passwordInput.type = this.checked ? "text" : "password";
         });
     </script>
 }
