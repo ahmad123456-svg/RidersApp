@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using Microsoft.AspNetCore.Http;
 
 namespace RidersApp.Controllers
 {
@@ -42,7 +43,6 @@ namespace RidersApp.Controllers
             if (countryId <= 0)
                 return Json(Enumerable.Empty<object>());
 
-            // Fix: Cast to the correct type instead of object
             var cities = await _cityService.GetByCountry(countryId);
             var result = cities.Cast<dynamic>().Select(c => new
             {
@@ -53,57 +53,12 @@ namespace RidersApp.Controllers
             return Json(result);
         }
 
-        // DataTables
+        // DataTables - delegate processing to service
         [HttpPost]
         public async Task<IActionResult> GetCitiesData()
         {
-            var draw = Request.Form["draw"].FirstOrDefault();
-            var start = Convert.ToInt32(Request.Form["start"].FirstOrDefault() ?? "0");
-            var length = Convert.ToInt32(Request.Form["length"].FirstOrDefault() ?? "10");
-            var searchValue = Request.Form["search[value]"].FirstOrDefault()?.Trim();
-            var sortColumnIndexString = Request.Form["order[0][column]"].FirstOrDefault();
-            var sortDirection = Request.Form["order[0][dir]"].FirstOrDefault();
-
-            int.TryParse(sortColumnIndexString, out int sortColumnIndex);
-            string[] columnNames = { "CityName", "PostalCode", "CountryName" };
-            string sortColumn = (sortColumnIndex >= 0 && sortColumnIndex < columnNames.Length)
-                ? columnNames[sortColumnIndex]
-                : "CityName";
-
-            var cities = await _cityService.GetAll();
-            var query = cities.AsQueryable();
-
-            var recordsTotal = query.Count();
-
-            if (!string.IsNullOrWhiteSpace(searchValue))
-            {
-                var lower = searchValue.ToLower();
-                query = query.Where(x =>
-                    (x.CityName ?? "").ToLower().Contains(lower) ||
-                    (x.PostalCode ?? "").ToLower().Contains(lower) ||
-                    (x.CountryName ?? "").ToLower().Contains(lower));
-            }
-
-            var recordsFiltered = query.Count();
-            bool ascending = string.Equals(sortDirection, "asc", StringComparison.OrdinalIgnoreCase);
-
-            query = sortColumn switch
-            {
-                "CityName" => ascending ? query.OrderBy(x => x.CityName) : query.OrderByDescending(x => x.CityName),
-                "PostalCode" => ascending ? query.OrderBy(x => x.PostalCode) : query.OrderByDescending(x => x.PostalCode),
-                "CountryName" => ascending ? query.OrderBy(x => x.CountryName) : query.OrderByDescending(x => x.CountryName),
-                _ => ascending ? query.OrderBy(x => x.CityName) : query.OrderByDescending(x => x.CityName)
-            };
-
-            var pageData = query.Skip(start).Take(length).ToList();
-
-            return Json(new
-            {
-                draw,
-                recordsTotal,
-                recordsFiltered,
-                data = pageData
-            });
+            var result = await _cityService.GetCitiesData(Request.Form);
+            return Json(result);
         }
 
         // Add or Edit

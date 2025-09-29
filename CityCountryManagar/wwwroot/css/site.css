@@ -118,7 +118,7 @@ footer {
 }
 label {
     display: inline-block;
-    color: white;
+    color: black; 
 }
     .btn-login {
     display: inline-block;
