@@ -1,6 +1,7 @@
 ﻿using RidersApp.ViewModels;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace RidersApp.IServices
 {
@@ -11,5 +12,6 @@ namespace RidersApp.IServices
         Task<List<EmployeeVM>> Add(EmployeeVM vm);
         Task<List<EmployeeVM>> Edit(EmployeeVM vm);
         Task<List<EmployeeVM>> Delete(int id);
+        Task<object> GetEmployeesData(IFormCollection form);
     }
 }

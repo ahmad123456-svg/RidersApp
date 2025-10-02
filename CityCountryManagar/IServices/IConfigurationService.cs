@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using RidersApp.ViewModels;
 
 namespace RidersApp.IServices
@@ -11,5 +12,6 @@ namespace RidersApp.IServices
         Task<List<ConfigurationVM>> Add(ConfigurationVM vm);
         Task<List<ConfigurationVM>> Edit(ConfigurationVM vm);
         Task<List<ConfigurationVM>> Delete(int id);
+        Task<object> GetConfigurationsData(IFormCollection form);
     }
 }

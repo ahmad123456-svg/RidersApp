@@ -1,0 +1,142 @@
+@model List<RidersApp.ViewModels.UserVM>
+@{
+    ViewData["Title"] = "Users";
+}
+
+<div class="container mt-4">
+    @* Display messages *@
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h4 class="mb-0">Users</h4>
+        <div>
+            <button class="btn btn-success" onclick="showInPopup('@Url.Action("AddOrEdit", "Users")', 'Add User')">Add New User</button>
+        </div>
+    </div>
+
+    <div id="view-all">
+        <table id="usersTable" class="table table-striped table-hover datatable">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>User Name</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th style="width:200px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable with server-side processing
+            var usersTable = $('#usersTable').DataTable({
+                processing: true,
+                serverSide: true,
+                language: {
+                    processing: "Please wait...",
+                    search: "Search:",
+                    paginate: { previous: "Previous", next: "Next" }
+                },
+                ajax: {
+                    url: '@Url.Action("GetUsersData", "Users")',
+                    type: 'POST'
+                },
+                columns: [
+                    { data: 'email' },
+                    { data: 'userName' },
+                    { data: 'firstName' },
+                    { data: 'lastName' },
+                    { 
+                        data: 'role',
+                        render: function (data, type, row) {
+                            return `<span   color: black;">${data}</span>`;
+                        }
+                    },
+                    { 
+                        data: 'userStatus',
+                        render: function (data, type, row) {
+                            var displayText = '';
+                            if (row.isLocked) {
+                                displayText = 'Locked';
+                            } else if (row.emailConfirmed) {
+                                displayText = 'Active';
+                            } else {
+                                displayText = 'Pending';
+                            }
+                            return `<span  color: black;">${displayText}</span>`;
+                        }
+                    },
+                    {
+                        data: 'id',
+                        orderable: false,
+                        searchable: false,
+                        render: function (data, type, row) {
+                            return `
+                                <a class="btn btn-primary btn-sm text-white" onclick="showInPopup('@Url.Action("AddOrEdit", "Users")?id=${data}', 'Edit User')">Edit</a>
+                                <a class="btn btn-danger btn-sm" onclick="deleteRecord('Users', '${data}')">Delete</a>
+                            `;
+                        }
+                    }
+                ],
+                paging: true,
+                pageLength: 25,
+                lengthChange: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                order: [[0, 'asc']] // Sort by email by default
+            });
+
+            // Store reference to DataTable for reloading
+            window.usersDataTable = usersTable;
+        });
+
+        // Override the reloadActiveDataTable function to include our users table
+        function reloadActiveDataTable() {
+            var reloaded = false;
+            
+            // Check for users table specifically
+            if (window.usersDataTable && typeof window.usersDataTable.ajax.reload === 'function') {
+                window.usersDataTable.ajax.reload(null, false);
+                reloaded = true;
+            }
+            
+            // Also check for other DataTables
+            if (!$.fn || !$.fn.DataTable) return reloaded;
+            $('table.datatable').each(function() {
+                if ($.fn.DataTable.isDataTable(this)) {
+                    var dt = $(this).DataTable();
+                    if (dt && dt.ajax && typeof dt.ajax.reload === 'function') {
+                        dt.ajax.reload(null, false);
+                        reloaded = true;
+                    }
+                }
+            });
+            
+            return reloaded;
+        }
+    </script>
+}

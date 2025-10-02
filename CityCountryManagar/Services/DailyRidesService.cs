@@ -6,6 +6,7 @@ using RidersApp.DbModels;
 using RidersApp.Interfaces;
 using RidersApp.IServices;
 using RidersApp.ViewModels;
+using Microsoft.AspNetCore.Http;
 
 namespace RidersApp.Services
 {
@@ -59,6 +60,66 @@ namespace RidersApp.Services
         {
             await _dailyRidesRepository.DeleteAsync(id);
             return await GetAll();
+        }
+
+        // DataTables logic moved from controller
+        public async Task<object> GetDailyRidesData(IFormCollection form)
+        {
+            var draw = form["draw"].FirstOrDefault();
+            var start = int.TryParse(form["start"].FirstOrDefault(), out int s) ? s : 0;
+            var length = int.TryParse(form["length"].FirstOrDefault(), out int l) ? l : 10;
+            var searchValue = form["search[value]"].FirstOrDefault()?.Trim();
+            var sortColumnIndexString = form["order[0][column]"].FirstOrDefault();
+            var sortDirection = form["order[0][dir]"].FirstOrDefault();
+
+            int.TryParse(sortColumnIndexString, out int sortColumnIndex);
+            string[] columnNames = new[] { "EmployeeName", "EntryDate", "CreditAmount", "CreditWAT", "CashAmount", "CashWAT", "Expense", "TodayRides", "TotalRides" };
+            string sortColumn = (sortColumnIndex >= 0 && sortColumnIndex < columnNames.Length)
+                ? columnNames[sortColumnIndex]
+                : columnNames[0];
+
+            var all = await GetAll();
+            var query = all.AsQueryable();
+
+            var recordsTotal = query.Count();
+
+            if (!string.IsNullOrWhiteSpace(searchValue))
+            {
+                var lower = searchValue.ToLower();
+                query = query.Where(x =>
+                    (x.EmployeeName ?? string.Empty).ToLower().Contains(lower)
+                    || x.EntryDate.ToString("yyyy-MM-dd").Contains(lower)
+                    || x.TodayRides.ToString().Contains(lower)
+                    || x.TotalRides.ToString().Contains(lower)
+                );
+            }
+
+            var recordsFiltered = query.Count();
+
+            bool ascending = string.Equals(sortDirection, "asc", StringComparison.OrdinalIgnoreCase);
+            query = sortColumn switch
+            {
+                "EmployeeName" => ascending ? query.OrderBy(x => x.EmployeeName) : query.OrderByDescending(x => x.EmployeeName),
+                "EntryDate" => ascending ? query.OrderBy(x => x.EntryDate) : query.OrderByDescending(x => x.EntryDate),
+                "CreditAmount" => ascending ? query.OrderBy(x => x.CreditAmount) : query.OrderByDescending(x => x.CreditAmount),
+                "CreditWAT" => ascending ? query.OrderBy(x => x.CreditWAT) : query.OrderByDescending(x => x.CreditWAT),
+                "CashAmount" => ascending ? query.OrderBy(x => x.CashAmount) : query.OrderByDescending(x => x.CashAmount),
+                "CashWAT" => ascending ? query.OrderBy(x => x.CashWAT) : query.OrderByDescending(x => x.CashWAT),
+                "Expense" => ascending ? query.OrderBy(x => x.Expense) : query.OrderByDescending(x => x.Expense),
+                "TodayRides" => ascending ? query.OrderBy(x => x.TodayRides) : query.OrderByDescending(x => x.TodayRides),
+                "TotalRides" => ascending ? query.OrderBy(x => x.TotalRides) : query.OrderByDescending(x => x.TotalRides),
+                _ => ascending ? query.OrderBy(x => x.EntryDate) : query.OrderByDescending(x => x.EntryDate)
+            };
+
+            var pageData = query.Skip(start).Take(length).ToList();
+
+            return new
+            {
+                draw,
+                recordsTotal,
+                recordsFiltered,
+                data = pageData
+            };
         }
 
         #region Helpers

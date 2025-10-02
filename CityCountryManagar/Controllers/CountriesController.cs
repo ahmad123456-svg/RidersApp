@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 
 namespace RidersApp.Controllers
 {
@@ -32,48 +33,8 @@ namespace RidersApp.Controllers
         [HttpPost]
         public async Task<IActionResult> GetCountriesData()
         {
-            var draw = Request.Form["draw"].FirstOrDefault();
-            var start = Convert.ToInt32(Request.Form["start"].FirstOrDefault() ?? "0");
-            var length = Convert.ToInt32(Request.Form["length"].FirstOrDefault() ?? "10");
-            var searchValue = Request.Form["search[value]"].FirstOrDefault()?.Trim();
-            var sortColumnIndexString = Request.Form["order[0][column]"].FirstOrDefault();
-            var sortDirection = Request.Form["order[0][dir]"].FirstOrDefault();
-
-            int.TryParse(sortColumnIndexString, out int sortColumnIndex);
-
-            string[] columnNames = new[] { "Name" };
-            string sortColumn = (sortColumnIndex >= 0 && sortColumnIndex < columnNames.Length)
-                ? columnNames[sortColumnIndex]
-                : columnNames[0];
-
-            var all = await _countryService.GetAll();
-            var query = all.AsQueryable();
-
-            var recordsTotal = query.Count();
-
-            if (!string.IsNullOrWhiteSpace(searchValue))
-            {
-                query = query.Where(x => (x.Name ?? string.Empty).ToLower().Contains(searchValue.ToLower()));
-            }
-
-            var recordsFiltered = query.Count();
-
-            bool ascending = string.Equals(sortDirection, "asc", StringComparison.OrdinalIgnoreCase);
-            query = sortColumn switch
-            {
-                "Name" => ascending ? query.OrderBy(x => x.Name) : query.OrderByDescending(x => x.Name),
-                _ => ascending ? query.OrderBy(x => x.Name) : query.OrderByDescending(x => x.Name)
-            };
-
-            var pageData = query.Skip(start).Take(length).ToList();
-
-            return Json(new
-            {
-                draw,
-                recordsTotal,
-                recordsFiltered,
-                data = pageData
-            });
+            var result = await _countryService.GetCountriesData(Request.Form);
+            return Json(result);
         }
 
         public async Task<IActionResult> AddOrEdit(int id = 0)

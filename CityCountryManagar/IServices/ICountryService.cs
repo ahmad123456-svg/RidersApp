@@ -1,4 +1,7 @@
 ﻿using RidersApp.ViewModels;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace RidersApp.IServices
 {
@@ -9,5 +12,6 @@ namespace RidersApp.IServices
         Task<List<CountryVM>> Add(CountryVM country);
         Task<List<CountryVM>> Edit(CountryVM country);
         Task<List<CountryVM>> Delete(int id);
+        Task<object> GetCountriesData(IFormCollection form);
     }
 }

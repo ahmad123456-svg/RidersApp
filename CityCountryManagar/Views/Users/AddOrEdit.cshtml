@@ -1,0 +1,111 @@
+@model RidersApp.ViewModels.UserVM
+@{
+    Layout = null;
+    // Get preserved password from ViewBag if available
+    var preservedPassword = ViewBag.PreservedPassword as string ?? Model.Password;
+}
+
+<form asp-action="AddOrEdit" asp-controller="Users" method="post" onsubmit="return ajaxFormSubmit(this);" autocomplete="off">
+    @if (Model.Id != null)
+    {
+        <input type="hidden" asp-for="Id" />
+    }
+    
+    <div class="form-group">
+        <label asp-for="Email"></label>
+        <input asp-for="Email" class="form-control" autocomplete="off" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    
+    <div class="form-group">
+        <label asp-for="UserName"></label>
+        <input asp-for="UserName" class="form-control" autocomplete="off" />
+        <span asp-validation-for="UserName" class="text-danger"></span>
+    </div>
+    
+    <div class="form-group">
+        <label asp-for="FirstName"></label>
+        <input asp-for="FirstName" class="form-control" autocomplete="off" />
+        <span asp-validation-for="FirstName" class="text-danger"></span>
+    </div>
+    
+    <div class="form-group">
+        <label asp-for="LastName"></label>
+        <input asp-for="LastName" class="form-control" autocomplete="off" />
+        <span asp-validation-for="LastName" class="text-danger"></span>
+    </div>
+    
+    <div class="form-group">
+        <label asp-for="Role"></label>
+        <select asp-for="Role" class="form-control">
+            <option value="">-- Select Role --</option>
+            <option value="Admin">Admin</option>
+            <option value="User">User</option>
+        </select>
+        <span asp-validation-for="Role" class="text-danger"></span>
+    </div>
+    
+    <div class="form-group">
+        <label asp-for="Password"></label>
+        @if (Model.IsEdit)
+        {
+            <input asp-for="Password" class="form-control" type="password" 
+                   autocomplete="new-password" 
+                   placeholder="••••••••••••" />
+        }
+        else
+        {
+            <input name="Password" class="form-control" type="password" 
+                   autocomplete="new-password" 
+                   placeholder="Enter password (minimum 8 characters)"
+                   value="@preservedPassword" />
+        }
+        <span asp-validation-for="Password" class="text-danger"></span>
+        @if (Model.Id != null)
+        {
+            <small class="form-text text-muted">
+                <i class="fas fa-info-circle"></i> Current password is set. Leave blank to keep unchanged, or enter new password to update.
+            </small>
+        }
+        else
+        {
+            <small class="form-text text-muted">
+                <strong>Password Requirements:</strong> Minimum 8 characters. This field is required.
+            </small>
+        }
+    </div>
+
+    <div class="form-group mt-3 text-end">
+        <button type="submit" class="btn btn-success">
+            <i class="fas fa-save"></i> @(Model.IsEdit ? "Update User" : "Create User")
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="$('#form-modal').modal('hide');">
+            <i class="fas fa-times"></i> Cancel
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            var passwordField = $('input[name="Password"]');
+            var isEditMode = @(Model.IsEdit ? "true" : "false");
+            
+            console.log('Form loaded for:', isEditMode ? 'Edit User' : 'New User');
+            
+            // Handle focus for edit mode
+            passwordField.on('focus', function() {
+                if (isEditMode && $(this).attr('placeholder').includes('••••')) {
+                    $(this).attr('placeholder', 'Enter new password (minimum 8 characters)');
+                }
+            });
+            
+            // Add form validation feedback
+            $('form').on('submit', function() {
+                console.log('Form submitted for:', isEditMode ? 'Edit User' : 'New User');
+                console.log('Password field value length:', passwordField.val().length);
+            });
+        });
+    </script>
+}

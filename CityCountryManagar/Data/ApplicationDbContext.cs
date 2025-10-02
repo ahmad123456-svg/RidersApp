@@ -49,6 +49,11 @@ namespace RidersApp.Data
                 .HasForeignKey(e => e.CountryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Configure decimal precision for Employee Salary
+            modelBuilder.Entity<Employee>()
+                .Property(e => e.Salary)
+                .HasPrecision(18, 2);
+
             // Configure decimal precision for DailyRides
             modelBuilder.Entity<DailyRides>()
                 .Property(d => d.CashAmount)

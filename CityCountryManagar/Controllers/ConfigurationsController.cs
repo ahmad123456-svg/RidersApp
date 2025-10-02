@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using RidersApp.IServices;
 using RidersApp.ViewModels;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 
 namespace RidersApp.Controllers
 {
@@ -33,54 +34,8 @@ namespace RidersApp.Controllers
         [HttpPost]
         public async Task<IActionResult> GetConfigurationsData()
         {
-            var draw = Request.Form["draw"].FirstOrDefault();
-            var start = Convert.ToInt32(Request.Form["start"].FirstOrDefault() ?? "0");
-            var length = Convert.ToInt32(Request.Form["length"].FirstOrDefault() ?? "10");
-            var searchValue = Request.Form["search[value]"].FirstOrDefault()?.Trim();
-            var sortColumnIndexString = Request.Form["order[0][column]"].FirstOrDefault();
-            var sortDirection = Request.Form["order[0][dir]"].FirstOrDefault();
-
-            int sortColumnIndex = 0;
-            int.TryParse(sortColumnIndexString, out sortColumnIndex);
-
-            string[] columnNames = new[] { "KeyName", "Value" };
-            string sortColumn = (sortColumnIndex >= 0 && sortColumnIndex < columnNames.Length)
-                ? columnNames[sortColumnIndex]
-                : columnNames[0];
-
-            var all = await _service.GetAll();
-            var query = all.AsQueryable();
-
-            var recordsTotal = query.Count();
-
-            if (!string.IsNullOrWhiteSpace(searchValue))
-            {
-                var lower = searchValue.ToLower();
-                query = query.Where(x =>
-                    (x.KeyName ?? string.Empty).ToLower().Contains(lower) ||
-                    (x.Value ?? string.Empty).ToLower().Contains(lower)
-                );
-            }
-
-            var recordsFiltered = query.Count();
-
-            bool ascending = string.Equals(sortDirection, "asc", StringComparison.OrdinalIgnoreCase);
-            query = sortColumn switch
-            {
-                "KeyName" => ascending ? query.OrderBy(x => x.KeyName) : query.OrderByDescending(x => x.KeyName),
-                "Value" => ascending ? query.OrderBy(x => x.Value) : query.OrderByDescending(x => x.Value),
-                _ => ascending ? query.OrderBy(x => x.KeyName) : query.OrderByDescending(x => x.KeyName)
-            };
-
-            var pageData = query.Skip(start).Take(length).ToList();
-
-            return Json(new
-            {
-                draw,
-                recordsTotal,
-                recordsFiltered,
-                data = pageData
-            });
+            var result = await _service.GetConfigurationsData(Request.Form);
+            return Json(result);
         }
 
         [HttpPost]

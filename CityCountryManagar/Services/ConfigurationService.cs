@@ -5,6 +5,7 @@ using RidersApp.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace RidersApp.Services
 {
@@ -70,6 +71,57 @@ namespace RidersApp.Services
         {
             await _repo.DeleteAsync(id);
             return await GetAll();
+        }
+
+        // DataTables logic moved from controller
+        public async Task<object> GetConfigurationsData(IFormCollection form)
+        {
+            var draw = form["draw"].FirstOrDefault();
+            var start = int.TryParse(form["start"].FirstOrDefault(), out int s) ? s : 0;
+            var length = int.TryParse(form["length"].FirstOrDefault(), out int l) ? l : 10;
+            var searchValue = form["search[value]"].FirstOrDefault()?.Trim();
+            var sortColumnIndexString = form["order[0][column]"].FirstOrDefault();
+            var sortDirection = form["order[0][dir]"].FirstOrDefault();
+
+            int.TryParse(sortColumnIndexString, out int sortColumnIndex);
+            string[] columnNames = new[] { "KeyName", "Value" };
+            string sortColumn = (sortColumnIndex >= 0 && sortColumnIndex < columnNames.Length)
+                ? columnNames[sortColumnIndex]
+                : columnNames[0];
+
+            var all = await GetAll();
+            var query = all.AsQueryable();
+
+            var recordsTotal = query.Count();
+
+            if (!string.IsNullOrWhiteSpace(searchValue))
+            {
+                var lower = searchValue.ToLower();
+                query = query.Where(x =>
+                    (x.KeyName ?? string.Empty).ToLower().Contains(lower) ||
+                    (x.Value ?? string.Empty).ToLower().Contains(lower)
+                );
+            }
+
+            var recordsFiltered = query.Count();
+
+            bool ascending = string.Equals(sortDirection, "asc", StringComparison.OrdinalIgnoreCase);
+            query = sortColumn switch
+            {
+                "KeyName" => ascending ? query.OrderBy(x => x.KeyName) : query.OrderByDescending(x => x.KeyName),
+                "Value" => ascending ? query.OrderBy(x => x.Value) : query.OrderByDescending(x => x.Value),
+                _ => ascending ? query.OrderBy(x => x.KeyName) : query.OrderByDescending(x => x.KeyName)
+            };
+
+            var pageData = query.Skip(start).Take(length).ToList();
+
+            return new
+            {
+                draw,
+                recordsTotal,
+                recordsFiltered,
+                data = pageData
+            };
         }
     }
 }

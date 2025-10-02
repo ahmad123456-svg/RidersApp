@@ -14,6 +14,14 @@ function showInPopup(url, title) {
 function reloadActiveDataTable() {
     if (!$.fn || !$.fn.DataTable) return false;
     var reloaded = false;
+    
+    // Check for specific DataTable instances stored in window object
+    if (window.usersDataTable && typeof window.usersDataTable.ajax.reload === 'function') {
+        window.usersDataTable.ajax.reload(null, false);
+        reloaded = true;
+    }
+    
+    // Check for other DataTables with server-side processing
     $('table.datatable').each(function() {
         if ($.fn.DataTable.isDataTable(this)) {
             var dt = $(this).DataTable();
@@ -28,16 +36,25 @@ function reloadActiveDataTable() {
 
 // AJAX submit for form with success messages
 function ajaxFormSubmit(form) {
+    console.log('ajaxFormSubmit called');
+    console.log('Form action:', $(form).attr('action'));
+    console.log('Form data:', $(form).serialize());
+    
     $.ajax({
         type: 'POST',
         url: $(form).attr('action'),
         data: $(form).serialize(),
         success: function (res) {
+            console.log('AJAX Success Response:', res);
+            
             if (res.isValid) {
-                // Prefer reloading existing server-side DataTables
+                console.log('Form submission successful');
+                
+                // Always try to reload DataTable first
                 var didReload = reloadActiveDataTable();
+                
+                // If no DataTable was reloaded and we have HTML content, use fallback
                 if (!didReload && res.html) {
-                    // Fallback for legacy client-side partial updates
                     $("#view-all").html(res.html);
                 }
 
@@ -53,8 +70,14 @@ function ajaxFormSubmit(form) {
                     showSuccessMessage(res.message);
                 }
             } else {
+                console.log('Form validation failed, updating modal content');
                 $("#form-modal .modal-body").html(res.html);
             }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Error:', {xhr, status, error});
+            console.error('Response Text:', xhr.responseText);
+            showErrorMessage('An error occurred while saving. Please try again.');
         }
     });
     return false;
@@ -78,10 +101,11 @@ function deleteRecord(controller, id) {
             },
             success: function(res) {
                 if (res.success) {
-                    // Prefer reloading existing server-side DataTables
+                    // Always try to reload DataTable first
                     var didReload = reloadActiveDataTable();
+                    
+                    // If no DataTable was reloaded and we have HTML content, use fallback
                     if (!didReload && res.html) {
-                        // Fallback: replace content
                         $("#view-all").html(res.html);
                     } else if (!didReload && !res.html) {
                         // Last resort
