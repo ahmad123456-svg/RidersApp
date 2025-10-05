@@ -1,13 +1,35 @@
 // Show modal popup and load partial view from controller
 function showInPopup(url, title) {
-    $.get(url, function (data) {
-        $("#form-modal .modal-body").html(data);
-        $("#form-modal .modal-title").html(title);
-        // Use Bootstrap 5 Modal API
-        var modalElement = document.getElementById('form-modal');
-        var modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
-        modalInstance.show();
-    });
+    console.log('showInPopup called with URL:', url);
+    console.log('showInPopup called with title:', title);
+    
+    $.get(url)
+        .done(function (data) {
+            console.log('Successfully loaded popup content');
+            $("#form-modal .modal-body").html(data);
+            $("#form-modal .modal-title").html(title);
+            // Use Bootstrap 5 Modal API
+            var modalElement = document.getElementById('form-modal');
+            var modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+            modalInstance.show();
+        })
+        .fail(function (xhr, status, error) {
+            console.error('Failed to load popup:', {xhr, status, error});
+            console.error('Response text:', xhr.responseText);
+            console.error('Status code:', xhr.status);
+            
+            // Show error message to user
+            var errorMessage = 'Failed to load form';
+            if (xhr.status === 403) {
+                errorMessage = 'Access denied. You do not have permission to access this feature.';
+            } else if (xhr.status === 404) {
+                errorMessage = 'The requested page was not found.';
+            } else if (xhr.status === 500) {
+                errorMessage = 'A server error occurred. Please try again later.';
+            }
+            
+            showErrorMessage(errorMessage);
+        });
 }
 
 // Try to reload any initialized DataTable on the page (server-side friendly)
@@ -34,11 +56,15 @@ function reloadActiveDataTable() {
     return reloaded;
 }
 
-// AJAX submit for form with success messages
+// AJAX submit for form with enhanced success message handling
 function ajaxFormSubmit(form) {
     console.log('ajaxFormSubmit called');
     console.log('Form action:', $(form).attr('action'));
-    console.log('Form data:', $(form).serialize());
+    
+    // Prevent double submission
+    var submitButton = $(form).find('button[type="submit"]');
+    var originalText = submitButton.html();
+    submitButton.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
     
     $.ajax({
         type: 'POST',
@@ -50,34 +76,43 @@ function ajaxFormSubmit(form) {
             if (res.isValid) {
                 console.log('Form submission successful');
                 
-                // Always try to reload DataTable first
-                var didReload = reloadActiveDataTable();
-                
-                // If no DataTable was reloaded and we have HTML content, use fallback
-                if (!didReload && res.html) {
-                    $("#view-all").html(res.html);
-                }
-
-                $("#form-modal .modal-body").html('');
-                $("#form-modal .modal-title").html('');
-                // Hide using Bootstrap 5 API
+                // Close modal immediately
                 var modalElement = document.getElementById('form-modal');
-                var modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
-                modalInstance.hide();
-                
-                // Show success message if available
-                if (res.message) {
-                    showSuccessMessage(res.message);
+                if (modalElement) {
+                    var modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+                    modalInstance.hide();
+                    
+                    // Clear modal content
+                    $("#form-modal .modal-body").html('');
+                    $("#form-modal .modal-title").html('');
                 }
+                
+                // Show success message after a short delay
+                setTimeout(function() {
+                    if (res.message) {
+                        showSuccessMessage(res.message);
+                    }
+                }, 300);
+                
+                // Reload DataTable
+                setTimeout(function() {
+                    reloadActiveDataTable();
+                }, 500);
+                
             } else {
                 console.log('Form validation failed, updating modal content');
                 $("#form-modal .modal-body").html(res.html);
+                
+                // Re-enable submit button
+                submitButton.prop('disabled', false).html(originalText);
             }
         },
         error: function(xhr, status, error) {
             console.error('AJAX Error:', {xhr, status, error});
-            console.error('Response Text:', xhr.responseText);
             showErrorMessage('An error occurred while saving. Please try again.');
+            
+            // Re-enable submit button
+            submitButton.prop('disabled', false).html(originalText);
         }
     });
     return false;
@@ -131,40 +166,48 @@ function deleteRecord(controller, id) {
 
 // Show success message
 function showSuccessMessage(message) {
+    // Remove any existing success messages first
+    $('.alert-success').remove();
+    
     var alertHtml = `
-        <div class="alert alert-success alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="position: fixed; top: 80px; right: 20px; z-index: 10000; min-width: 350px; max-width: 500px;">
             <i class="fas fa-check-circle me-2"></i>
-            ${message}
+            <strong>Success!</strong> ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     `;
     
     $('body').append(alertHtml);
     
+    // Auto-remove after 4 seconds
     setTimeout(function() {
         $('.alert-success').fadeOut('slow', function() {
             $(this).remove();
         });
-    }, 3000);
+    }, 4000);
 }
 
 // Show error message
 function showErrorMessage(message) {
+    // Remove any existing error messages first
+    $('.alert-danger').remove();
+    
     var alertHtml = `
-        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="position: fixed; top: 80px; right: 20px; z-index: 10000; min-width: 350px; max-width: 500px;">
             <i class="fas fa-exclamation-circle me-2"></i>
-            ${message}
+            <strong>Error!</strong> ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     `;
     
     $('body').append(alertHtml);
     
+    // Auto-remove after 6 seconds
     setTimeout(function() {
         $('.alert-danger').fadeOut('slow', function() {
             $(this).remove();
         });
-    }, 5000);
+    }, 6000);
 }
 
 $(document).ready(function () {
@@ -182,5 +225,12 @@ $(document).ready(function () {
                 });
             });
         }
+    });
+    
+    // Modal cleanup when hidden
+    $('#form-modal').on('hidden.bs.modal', function () {
+        $(this).find('.modal-body').html('');
+        $(this).find('.modal-title').html('');
+        console.log('Modal hidden and cleaned up');
     });
 });

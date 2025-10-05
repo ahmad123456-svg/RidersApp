@@ -55,6 +55,9 @@ builder.Services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
 builder.Services.AddScoped<IConfigurationService, ConfigurationService>();
 builder.Services.AddScoped<IUserService, UserService>(); // ✅ Added IUserService and UserService
 
+// ✅ Add HttpContextAccessor for accessing current user in services
+builder.Services.AddHttpContextAccessor();
+
 // Login path configuration
 builder.Services.ConfigureApplicationCookie(options =>
 {

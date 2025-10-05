@@ -4,9 +4,11 @@ using RidersApp.IServices;
 using RidersApp.ViewModels;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 
 namespace RidersApp.Controllers
 {
+    [Authorize(Roles = "User,Admin")]
     public class ConfigurationsController : Controller
     {
         private readonly IConfigurationService _service;

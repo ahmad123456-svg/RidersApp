@@ -54,8 +54,9 @@ namespace RidersApp.Controllers
         {
             bool isNewUser = string.IsNullOrEmpty(id);
             string originalPassword = vm.Password;
+            string originalConfirmPassword = vm.ConfirmPassword;
             
-            // Clean ModelState and validate password using service
+            // Delegate validation to service
             _userService.CleanModelStateForUser(ModelState, isNewUser);
             _userService.ValidateUserPassword(ModelState, vm, isNewUser);
             
@@ -84,14 +85,97 @@ namespace RidersApp.Controllers
                 }
             }
             
-            // Prepare password for return using service
+           
             _userService.PreparePasswordForReturn(vm, originalPassword, isNewUser);
+            
+            // Store confirm password in ViewBag for preservation on validation errors (new users only)
+            if (isNewUser)
+            {
+                ViewBag.PreservedConfirmPassword = originalConfirmPassword;
+            }
             
             return Json(new
             {
                 isValid = false,
                 html = Helper.RenderRazorViewToString(this, "AddOrEdit", vm)
             });
+        }
+
+        public async Task<IActionResult> UpdatePassword(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+                return NotFound();
+                
+            try
+            {
+                var vm = await _userService.GetUserForPasswordUpdate(id);
+                return PartialView(vm);
+            }
+            catch (Exception ex)
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdatePassword(UpdatePasswordVM vm)
+        {
+            var result = await _userService.ProcessUpdatePassword(vm, ModelState);
+            
+            if (result.success)
+            {
+                return Json(new { isValid = true, message = result.message });
+            }
+           
+            var html = result.html ?? Helper.RenderRazorViewToString(this, "UpdatePassword", vm);
+            return Json(new { isValid = false, html });
+        }
+
+        
+        [Authorize] 
+        [AllowAnonymous] // Override the class-level Admin restriction
+        public async Task<IActionResult> ChangePassword()
+        {
+            
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
+            
+            try
+            {
+                var vm = await _userService.GetCurrentUserForPasswordChange();
+                return PartialView(vm);
+            }
+            catch (Exception ex)
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpPost]
+        [Authorize] 
+        [AllowAnonymous] 
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordVM vm)
+        {
+          
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
+            
+            var result = await _userService.ProcessChangePassword(vm, ModelState);
+            
+            if (result.success)
+            {
+                return Json(new { isValid = true, message = result.message });
+            }
+            
+            // Handle validation errors - render view if service didn't provide HTML
+            var html = result.html ?? Helper.RenderRazorViewToString(this, "ChangePassword", vm);
+            return Json(new { isValid = false, html });
         }
 
         [HttpPost]
@@ -101,19 +185,11 @@ namespace RidersApp.Controllers
             try
             {
                 await _userService.Delete(id);
-                return Json(new
-                {
-                    success = true,
-                    message = "User deleted successfully"
-                });
+                return Json(new { success = true, message = "User deleted successfully" });
             }
             catch (Exception ex)
             {
-                return Json(new
-                {
-                    success = false,
-                    message = ex.Message
-                });
+                return Json(new { success = false, message = ex.Message });
             }
         }
     }

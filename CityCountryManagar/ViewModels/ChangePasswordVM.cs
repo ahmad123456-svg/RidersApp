@@ -1,0 +1,25 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace RidersApp.ViewModels
+{
+    public class ChangePasswordVM
+    {
+        [Required(ErrorMessage = "Current password is required.")]
+        [Display(Name = "Current Password")]
+        public string CurrentPassword { get; set; }
+
+        [Required(ErrorMessage = "New password is required.")]
+        [StringLength(100, ErrorMessage = "The password must be at least {2} and at max {1} characters long.", MinimumLength = 8)]
+        [Display(Name = "New Password")]
+        public string NewPassword { get; set; }
+
+        [Required(ErrorMessage = "Please confirm your new password.")]
+        [Compare("NewPassword", ErrorMessage = "The new password and confirmation password do not match.")]
+        [Display(Name = "Confirm New Password")]
+        public string ConfirmPassword { get; set; }
+
+        // Display properties
+        public string Email { get; set; }
+        public string FullName { get; set; }
+    }
+}

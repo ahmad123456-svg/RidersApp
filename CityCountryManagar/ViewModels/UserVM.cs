@@ -11,7 +11,7 @@ namespace RidersApp.ViewModels
         [EmailAddress]
         public string Email { get; set; }
 
-        [Required]
+        // UserName will be set to Email automatically - not displayed in form
         public string UserName { get; set; }
 
         [Required]
@@ -25,6 +25,10 @@ namespace RidersApp.ViewModels
 
         // Password field (for create/edit only - not stored directly)
         public string Password { get; set; }
+
+        // Confirm password field for validation
+        [Compare("Password", ErrorMessage = "Password and Confirm Password do not match.")]
+        public string ConfirmPassword { get; set; }
 
         // Additional database fields (optional for display/advanced management)
         public string NormalizedUserName { get; set; }

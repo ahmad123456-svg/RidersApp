@@ -15,9 +15,21 @@ namespace RidersApp.IServices
         Task<List<UserVM>> Delete(string id);
         Task<object> GetUsersData(IFormCollection form);
         
-        // New methods for validation and processing
+        // ? Enhanced Password update methods for admin
+        Task<UpdatePasswordVM> GetUserForPasswordUpdate(string id);
+        Task<(bool success, string message, string html)> ProcessUpdatePassword(UpdatePasswordVM vm, ModelStateDictionary modelState);
+        
+        // ? Enhanced Password change methods for user self-service
+        Task<ChangePasswordVM> GetCurrentUserForPasswordChange();
+        Task<(bool success, string message, string html)> ProcessChangePassword(ChangePasswordVM vm, ModelStateDictionary modelState);
+        
+        // Existing validation methods
         void CleanModelStateForUser(ModelStateDictionary modelState, bool isNewUser);
         void ValidateUserPassword(ModelStateDictionary modelState, UserVM vm, bool isNewUser);
         void PreparePasswordForReturn(UserVM vm, string originalPassword, bool isNewUser);
+        
+        // ? New methods for rendering views
+        string RenderUpdatePasswordView(UpdatePasswordVM vm);
+        string RenderChangePasswordView(ChangePasswordVM vm);
     }
 }

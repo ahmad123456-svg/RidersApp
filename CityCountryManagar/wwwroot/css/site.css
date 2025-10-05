@@ -1,6 +1,6 @@
 html {
     font-size: 14px;
-}eaarch
+}
 
 @media (min-width: 768px) {
     html {
@@ -205,6 +205,7 @@ label {
 }
 
     .input-group input,
+    .input-group select,
     .login-page .container1 .form-control {
         width: 100%;
         height: 44px;
@@ -216,6 +217,16 @@ label {
         transition: border-color 0.18s ease, box-shadow 0.18s ease;
         box-shadow: none;
         outline: none;
+    }
+
+    .input-group select {
+        cursor: pointer;
+    }
+
+    .input-group input:focus,
+    .input-group select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 6px 18px rgba(37,99,235,0.06);
     }
 
     /* Floating label */
@@ -360,3 +371,134 @@ table.dataTable {
         background-color: #c82333;
         border-color: #bd2130;
     }
+/* ================= Action Buttons in Tables ================= */
+/* Action buttons container - ensures buttons stay in one row */
+.btn-group {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+    gap: 3px;
+}
+
+/* Action buttons styling */
+    .btn-group .btn {
+        font-size: 0.8rem !important;
+        padding: 0.3rem -6.2rem !important;
+        white-space: nowrap !important;
+        border-radius: 4px !important;
+        font-weight: 500 !important;
+        text-decoration: none !important;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+    }
+
+/* Specific button colors to match your image */
+.btn-group .btn-primary {
+    background-color: #17a2b8 !important; /* Cyan/Info color like in image */
+    border-color: #17a2b8 !important;
+    color: white !important;
+}
+
+.btn-group .btn-primary:hover {
+    background-color: #138496 !important;
+    border-color: #117a8b !important;
+}
+
+.btn-group .btn-warning {
+    background-color: #ffc107 !important; /* Warning yellow */
+    border-color: #ffc107 !important;
+    color: #212529 !important; /* Dark text for better contrast */
+}
+
+.btn-group .btn-warning:hover {
+    background-color: #e0a800 !important;
+    border-color: #d39e00 !important;
+}
+
+.btn-group .btn-danger {
+    background-color: #dc3545 !important; /* Red danger */
+    border-color: #dc3545 !important;
+    color: white !important;
+}
+
+.btn-group .btn-danger:hover {
+    background-color: #c82333 !important;
+    border-color: #bd2130 !important;
+}
+
+/* DataTable Actions column specific styling */
+table.dataTable td:last-child {
+    white-space: nowrap !important;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Ensure actions column has adequate width */
+table.dataTable th:last-child,
+table.dataTable td:last-child {
+    min-width: 320px;
+    width: 320px;
+}
+
+/* Table responsiveness for action buttons */
+@media (max-width: 768px) {
+    .btn-group .btn {
+        font-size: 0.7rem !important;
+        padding: 0.25rem 0.5rem !important;
+    }
+    
+    table.dataTable th:last-child,
+    table.dataTable td:last-child {
+        min-width: 280px;
+        width: 280px;
+    }
+}
+
+/* ================= Alert/Toast Messages ================= */
+/* Success and error message positioning and styling */
+.alert-success,
+.alert-danger {
+    position: fixed !important;
+    top: 80px !important;
+    right: 20px !important;
+    z-index: 10000 !important;
+    min-width: 350px !important;
+    max-width: 500px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    animation: slideInRight 0.3s ease-out !important;
+}
+
+/* Animation for success/error messages */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Enhanced modal backdrop to ensure it doesn't interfere with alerts */
+.modal-backdrop {
+    z-index: 1040 !important;
+}
+
+/* Ensure modal is below alerts */
+.modal {
+    z-index: 1050 !important;
+}
+
+/* ================= User Profile Dropdown Responsive Styles ================= */
+@media (max-width: 768px) {
+    .user-name {
+        display: none;
+    }
+    
+    .user-dropdown {
+        min-width: 250px !important;
+    }
+}

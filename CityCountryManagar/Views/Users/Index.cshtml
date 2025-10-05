@@ -32,12 +32,11 @@
             <thead>
                 <tr>
                     <th>Email</th>
-                    <th>User Name</th>
                     <th>First Name</th>
                     <th>Last Name</th>
                     <th>Role</th>
                     <th>Status</th>
-                    <th style="width:200px;">Actions</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -65,13 +64,12 @@
                 },
                 columns: [
                     { data: 'email' },
-                    { data: 'userName' },
                     { data: 'firstName' },
                     { data: 'lastName' },
                     { 
                         data: 'role',
                         render: function (data, type, row) {
-                            return `<span   color: black;">${data}</span>`;
+                            return `<span class="badge" style="background-color: black; color: white;">${data}</span>`;
                         }
                     },
                     { 
@@ -85,7 +83,7 @@
                             } else {
                                 displayText = 'Pending';
                             }
-                            return `<span  color: black;">${displayText}</span>`;
+                            return `<span class="badge" style="background-color: black; color: white;">${displayText}</span>`;
                         }
                     },
                     {
@@ -94,8 +92,11 @@
                         searchable: false,
                         render: function (data, type, row) {
                             return `
-                                <a class="btn btn-primary btn-sm text-white" onclick="showInPopup('@Url.Action("AddOrEdit", "Users")?id=${data}', 'Edit User')">Edit</a>
-                                <a class="btn btn-danger btn-sm" onclick="deleteRecord('Users', '${data}')">Delete</a>
+                                <div class="btn-group" role="group">
+                                    <a class="btn btn-primary btn-sm" onclick="showInPopup('@Url.Action("AddOrEdit", "Users")?id=${data}', 'Edit User')" title="Edit User">Edit</a>
+                                    <a class="btn btn-warning btn-sm" onclick="showInPopup('@Url.Action("UpdatePassword", "Users")?id=${data}', 'Update Password')" title="Update Password">Update Password</a>
+                                    <a class="btn btn-danger btn-sm" onclick="deleteRecord('Users', '${data}')" title="Delete User">Delete</a>
+                                </div>
                             `;
                         }
                     }

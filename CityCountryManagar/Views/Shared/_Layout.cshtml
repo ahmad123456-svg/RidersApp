@@ -1,3 +1,9 @@
+@using Microsoft.AspNetCore.Identity
+@using RidersApp.Areas.Identity.Data
+
+@inject SignInManager<RidersAppUser> SignInManager
+@inject UserManager<RidersAppUser> UserManager
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,6 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
     <link rel="stylesheet" href="//cdn.datatables.net/2.3.3/css/dataTables.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
         body {
             font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
@@ -21,6 +28,92 @@
 
         table.dataTable {
             width: 100% !important;
+        }
+
+        /* User Profile Dropdown Styles */
+        .user-profile-dropdown {
+            display: flex;
+            align-items: center;
+            text-decoration: none !important;
+            color: white !important;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            transition: background-color 0.2s ease;
+        }
+
+        .user-profile-dropdown:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white !important;
+        }
+
+        .user-name {
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+
+        .user-dropdown {
+            min-width: 280px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            border: none;
+            padding: 0.5rem 0;
+        }
+
+        .user-dropdown .dropdown-header {
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-dropdown .dropdown-item {
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+
+        .user-dropdown .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .user-dropdown .dropdown-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .user-dropdown .dropdown-item.text-danger:hover {
+            background-color: #f8d7da;
+            color: #721c24 !important;
+        }
+
+        /* User Profile Image Styles */
+        .user-profile-image,
+        .user-profile-image-large {
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background-color: #007bff;
+        }
+
+        .user-profile-image {
+            width: 32px !important;
+            height: 32px !important;
+        }
+
+        .user-profile-image-large {
+            width: 40px !important;
+            height: 40px !important;
+        }
+
+        /* Email text styling */
+        .user-info .text-muted {
+            font-size: 0.85rem;
+            opacity: 0.8;
         }
     </style>
 </head>
@@ -47,32 +140,84 @@
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Cities" asp-action="Index">Cities</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Countries" asp-action="Index">Countries</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Employees" asp-action="Index">Employees</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="DailyRides" asp-action="Index">Daily Rides</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Configurations" asp-action="Index">Configurations</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Users" asp-action="Index">Users</a>
-                                </li>
+                                
+                                @* Admin users can see all menu items *@
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link" asp-controller="Cities" asp-action="Index">Cities</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" asp-controller="Countries" asp-action="Index">Countries</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" asp-controller="Employees" asp-action="Index">Employees</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" asp-controller="DailyRides" asp-action="Index">Daily Rides</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" asp-controller="Configurations" asp-action="Index">Configurations</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link text-dark" asp-controller="Users" asp-action="Index">Users</a>
+                                    </li>
+                                }
+                                @* Regular users can only see specific menu items *@
+                                else if (User.IsInRole("User"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link" asp-controller="DailyRides" asp-action="Index">Daily Rides</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" asp-controller="Configurations" asp-action="Index">Configurations</a>
+                                    </li>
+                                }
+                                
                                 <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" href="#" id="settingsDropdown" role="button"
+                                    <a class="nav-link dropdown-toggle user-profile-dropdown" href="#" id="userProfileDropdown" role="button"
                                        data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="bi bi-gear"></i> Settings
+                                        <img src="~/Image/download.png" 
+                                             alt="Profile" class="rounded-circle me-2 user-profile-image" width="32" height="32"
+                                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiMwMDdiZmYiLz4KPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1zbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggNkM5LjEwNDU3IDYgMTAgNi44OTU0MyAxMCA4QzEwIDkuMTA0NTcgOS4xMDQ1NyAxMCA4IDEwQzYuODk1NDMgMTAgNiA5LjEwNDU3IDYgOEM2IDYuODk1NDMgNi44OTU0MyA2IDggNloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik04IDEyQzUuNzkwODYgMTIgNCAxMy43OTA4NiA0IDE2SDEyQzEyIDEzLjc5MDg2IDEwLjIwOTEgMTIgOCAxMloiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo8L3N2Zz4K';">
+                                        <span class="user-name">@UserManager.GetUserName(User)</span>
                                     </a>
-                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="settingsDropdown">
+                                    <ul class="dropdown-menu dropdown-menu-end user-dropdown" aria-labelledby="userProfileDropdown">
+                                        <li class="dropdown-header">
+                                            <div class="user-info">
+                                                <img src="~/Image/download.png" 
+                                                     alt="Profile" class="rounded-circle me-2 user-profile-image-large" width="40" height="40"
+                                                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1zbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiMwMDdiZmYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1zbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEwIDdDMTEuMzgwNyA3IDEyLjUgOC4xMTkzIDEyLjUgOS41QzEyLjUgMTAuODgwNyAxMS4zODA3IDEyIDEwIDEyQzguNjE5MyAxMiA3LjUgMTAuODgwNyA3LjUgOS41QzcuNSA4LjExOTMgOC42MTkzIDcgMTAgN1oiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMCAxNUM3LjIzODU4IDE1IDUgMTcuMjM4NiA1IDIwSDEuNUMxNSAxNy4yMzg2IDEyLjc2MTQgMTUgMTAgMTVaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4KPC9zdmc+Cg==';">
+                                                <div>
+                                                    <div class="fw-bold">@UserManager.GetUserName(User)</div>
+                                                    <div class="text-muted small">@User.Identity.Name</div>
+                                                </div>
+                                            </div>
+                                        </li>
                                         <li><hr class="dropdown-divider"></li>
-                                        <li><partial name="_LoginPartial" /></li>
+                                        
+                                        @if (User.IsInRole("User"))
+                                        {
+                                            <li>
+                                                <a class="dropdown-item" href="#" onclick="showInPopup('@Url.Action("ChangePassword", "Users")', 'Change Password'); return false;">
+                                                    <i class="fas fa-key me-2"></i> Change Password
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                        }
+                                        
+                                        <li>
+                                            <a class="dropdown-item" href="mailto:@User.Identity.Name">
+                                                <i class="fas fa-envelope me-2"></i> Email
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" class="d-inline w-100">
+                                                <button type="submit" class="dropdown-item text-danger">
+                                                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                                                </button>
+                                            </form>
+                                        </li>
                                     </ul>
                                 </li>
                             </ul>

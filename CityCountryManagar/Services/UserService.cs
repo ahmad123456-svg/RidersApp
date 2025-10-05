@@ -15,11 +15,13 @@ namespace RidersApp.Services
     {
         private readonly UserManager<RidersAppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UserService(UserManager<RidersAppUser> userManager, RoleManager<IdentityRole> roleManager)
+        public UserService(UserManager<RidersAppUser> userManager, RoleManager<IdentityRole> roleManager, IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<List<UserVM>> GetAll()
@@ -93,12 +95,15 @@ namespace RidersApp.Services
 
         public async Task<List<UserVM>> Add(UserVM vm)
         {
-            Console.WriteLine($"UserService.Add called for user: {vm.UserName}");
+            Console.WriteLine($"UserService.Add called for user: {vm.Email}");
             Console.WriteLine($"Password provided: {!string.IsNullOrWhiteSpace(vm.Password)}");
+            
+            // ? Set UserName to Email automatically
+            vm.UserName = vm.Email;
             
             var user = new RidersAppUser
             {
-                UserName = vm.UserName,
+                UserName = vm.Email, // Use Email as UserName
                 Email = vm.Email,
                 FirstName = vm.FirstName,
                 LastName = vm.LastName,
@@ -108,7 +113,7 @@ namespace RidersApp.Services
                 LockoutEnabled = false // New users should not be locked by default
             };
             
-            Console.WriteLine("Creating user with UserManager...");
+            Console.WriteLine($"Creating user with Email as UserName: {vm.Email}");
             var result = await _userManager.CreateAsync(user, vm.Password);
             if (!result.Succeeded)
             {
@@ -141,8 +146,7 @@ namespace RidersApp.Services
 
         public async Task<List<UserVM>> Edit(UserVM vm)
         {
-            Console.WriteLine($"UserService.Edit called for user: {vm.UserName} (ID: {vm.Id})");
-            Console.WriteLine($"Password provided: {!string.IsNullOrWhiteSpace(vm.Password)}");
+            Console.WriteLine($"UserService.Edit called for user: {vm.Email} (ID: {vm.Id})");
             
             var user = await _userManager.FindByIdAsync(vm.Id);
             if (user == null) 
@@ -155,8 +159,11 @@ namespace RidersApp.Services
             Console.WriteLine($"Current EmailConfirmed status: {user.EmailConfirmed}");
             Console.WriteLine($"Updating user properties...");
             
+            // ? Set UserName to Email for consistency
+            vm.UserName = vm.Email;
+            
             // Update basic properties
-            user.UserName = vm.UserName;
+            user.UserName = vm.Email; // Use Email as UserName
             user.Email = vm.Email;
             user.FirstName = vm.FirstName;
             user.LastName = vm.LastName;
@@ -183,24 +190,8 @@ namespace RidersApp.Services
             
             Console.WriteLine("User updated successfully");
             
-            // Update password if provided
-            if (!string.IsNullOrWhiteSpace(vm.Password))
-            {
-                Console.WriteLine("Updating user password...");
-                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var passwordResult = await _userManager.ResetPasswordAsync(user, token, vm.Password);
-                if (!passwordResult.Succeeded)
-                {
-                    var passwordErrors = string.Join(", ", passwordResult.Errors.Select(e => e.Description));
-                    Console.WriteLine($"Password update failed: {passwordErrors}");
-                    throw new Exception($"User updated but failed to change password: {passwordErrors}");
-                }
-                Console.WriteLine("Password updated successfully");
-            }
-            else
-            {
-                Console.WriteLine("No password provided, keeping existing password");
-            }
+            // ? SKIP password update for edit operations since password fields are hidden
+            Console.WriteLine("Password update skipped - password fields are hidden during edit");
             
             // Update roles
             Console.WriteLine($"Updating user role to: {vm.Role}");
@@ -230,7 +221,7 @@ namespace RidersApp.Services
                 Console.WriteLine("User already has the correct role");
             }
             
-            Console.WriteLine("User edit completed successfully - user remains active");
+            Console.WriteLine("User edit completed successfully - user remains active, password unchanged");
             return await GetAll();
         }
 
@@ -259,6 +250,221 @@ namespace RidersApp.Services
             return await GetAll();
         }
 
+        // ? NEW: Password update methods
+        public async Task<UpdatePasswordVM> GetUserForPasswordUpdate(string id)
+        {
+            Console.WriteLine($"UserService.GetUserForPasswordUpdate called for id: {id}");
+            
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) 
+            {
+                Console.WriteLine($"User with id {id} not found");
+                throw new Exception("User not found");
+            }
+            
+            Console.WriteLine($"Found user for password update: {user.UserName}");
+            
+            return new UpdatePasswordVM
+            {
+                Id = user.Id,
+                Email = user.Email,
+                FullName = $"{user.FirstName} {user.LastName}"
+            };
+        }
+
+        public async Task UpdateUserPassword(UpdatePasswordVM vm)
+        {
+            Console.WriteLine($"UserService.UpdateUserPassword called for user ID: {vm.Id}");
+            
+            var user = await _userManager.FindByIdAsync(vm.Id);
+            if (user == null) 
+            {
+                Console.WriteLine($"User with id {vm.Id} not found");
+                throw new Exception("User not found");
+            }
+            
+            Console.WriteLine($"Updating password for user: {user.UserName}");
+            
+            // Reset password using UserManager
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, vm.NewPassword);
+            
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                Console.WriteLine($"Password update failed: {errors}");
+                throw new Exception($"Failed to update password: {errors}");
+            }
+            
+            Console.WriteLine("Password updated successfully");
+        }
+
+        // ? NEW: User self-password change methods
+        public async Task<ChangePasswordVM> GetCurrentUserForPasswordChange()
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext?.User?.Identity?.IsAuthenticated != true)
+            {
+                throw new Exception("User not authenticated");
+            }
+
+            var currentUser = await _userManager.GetUserAsync(httpContext.User);
+            if (currentUser == null)
+            {
+                throw new Exception("Current user not found");
+            }
+
+            Console.WriteLine($"Getting current user for password change: {currentUser.UserName}");
+
+            return new ChangePasswordVM
+            {
+                Email = currentUser.Email,
+                FullName = $"{currentUser.FirstName} {currentUser.LastName}"
+            };
+        }
+
+        public async Task ChangeCurrentUserPassword(ChangePasswordVM vm)
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext?.User?.Identity?.IsAuthenticated != true)
+            {
+                throw new Exception("User not authenticated");
+            }
+
+            var currentUser = await _userManager.GetUserAsync(httpContext.User);
+            if (currentUser == null)
+            {
+                throw new Exception("Current user not found");
+            }
+
+            Console.WriteLine($"Changing password for current user: {currentUser.UserName}");
+
+            // Verify current password
+            var isCurrentPasswordValid = await _userManager.CheckPasswordAsync(currentUser, vm.CurrentPassword);
+            if (!isCurrentPasswordValid)
+            {
+                Console.WriteLine("Current password is incorrect");
+                throw new Exception("Current password is incorrect");
+            }
+
+            // Change password
+            var result = await _userManager.ChangePasswordAsync(currentUser, vm.CurrentPassword, vm.NewPassword);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                Console.WriteLine($"Password change failed: {errors}");
+                throw new Exception($"Failed to change password: {errors}");
+            }
+
+            Console.WriteLine("Password changed successfully");
+        }
+
+        // ? NEW: Enhanced business logic methods for controller
+        public async Task<(bool success, string message, string html)> ProcessUpdatePassword(UpdatePasswordVM vm, ModelStateDictionary modelState)
+        {
+            Console.WriteLine($"ProcessUpdatePassword called for user ID: {vm.Id}");
+            
+            // Remove display-only fields from validation
+            modelState.Remove("Email");
+            modelState.Remove("FullName");
+            
+            Console.WriteLine($"ModelState.IsValid: {modelState.IsValid}");
+            
+            if (modelState.IsValid)
+            {
+                try
+                {
+                    Console.WriteLine("Attempting to update password...");
+                    await UpdateUserPassword(vm);
+                    Console.WriteLine("Password updated successfully in service");
+                    
+                    return (true, "Password updated successfully", null);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error updating password: {ex.Message}");
+                    modelState.AddModelError("", ex.Message);
+                }
+            }
+            else
+            {
+                Console.WriteLine("ModelState validation failed:");
+                foreach (var modelError in modelState)
+                {
+                    var key = modelError.Key;
+                    var errors = modelError.Value.Errors;
+                    foreach (var error in errors)
+                    {
+                        Console.WriteLine($"  {key}: {error.ErrorMessage}");
+                    }
+                }
+            }
+            
+            Console.WriteLine("Returning validation error response");
+            return (false, null, RenderUpdatePasswordView(vm));
+        }
+
+        public async Task<(bool success, string message, string html)> ProcessChangePassword(ChangePasswordVM vm, ModelStateDictionary modelState)
+        {
+            Console.WriteLine($"ProcessChangePassword called for current user");
+            
+            // Remove display-only fields from validation
+            modelState.Remove("Email");
+            modelState.Remove("FullName");
+            
+            Console.WriteLine($"ModelState.IsValid: {modelState.IsValid}");
+            
+            if (modelState.IsValid)
+            {
+                try
+                {
+                    Console.WriteLine("Attempting to change current user password...");
+                    await ChangeCurrentUserPassword(vm);
+                    Console.WriteLine("Password changed successfully");
+                    
+                    return (true, "Password changed successfully", null);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error changing password: {ex.Message}");
+                    modelState.AddModelError("", ex.Message);
+                }
+            }
+            else
+            {
+                Console.WriteLine("ModelState validation failed:");
+                foreach (var modelError in modelState)
+                {
+                    var key = modelError.Key;
+                    var errors = modelError.Value.Errors;
+                    foreach (var error in errors)
+                    {
+                        Console.WriteLine($"  {key}: {error.ErrorMessage}");
+                    }
+                }
+            }
+            
+            Console.WriteLine("Returning validation error response");
+            return (false, null, RenderChangePasswordView(vm));
+        }
+
+        // ? NEW: View rendering methods (to be implemented with proper dependency injection)
+        public string RenderUpdatePasswordView(UpdatePasswordVM vm)
+        {
+            // This will be implemented with proper view rendering
+            // For now, return null to indicate we need to handle this in controller
+            // until we can inject the view rendering service
+            return null;
+        }
+
+        public string RenderChangePasswordView(ChangePasswordVM vm)
+        {
+            // This will be implemented with proper view rendering
+            // For now, return null to indicate we need to handle this in controller
+            // until we can inject the view rendering service
+            return null;
+        }
+
         // DataTables server-side processing for Users
         public async Task<object> GetUsersData(IFormCollection form)
         {
@@ -270,7 +476,8 @@ namespace RidersApp.Services
             var sortDirection = form["order[0][dir]"].FirstOrDefault();
 
             int.TryParse(sortColumnIndexString, out int sortColumnIndex);
-            string[] columnNames = new[] { "Email", "UserName", "FirstName", "LastName", "Role", "UserStatus" };
+            // ? Updated column names to match new table structure (removed UserName)
+            string[] columnNames = new[] { "Email", "FirstName", "LastName", "Role", "UserStatus" };
             string sortColumn = (sortColumnIndex >= 0 && sortColumnIndex < columnNames.Length)
                 ? columnNames[sortColumnIndex]
                 : columnNames[0];
@@ -285,7 +492,6 @@ namespace RidersApp.Services
                 var lower = searchValue.ToLower();
                 query = query.Where(x =>
                     (x.Email ?? string.Empty).ToLower().Contains(lower) ||
-                    (x.UserName ?? string.Empty).ToLower().Contains(lower) ||
                     (x.FirstName ?? string.Empty).ToLower().Contains(lower) ||
                     (x.LastName ?? string.Empty).ToLower().Contains(lower) ||
                     (x.Role ?? string.Empty).ToLower().Contains(lower)
@@ -298,7 +504,6 @@ namespace RidersApp.Services
             query = sortColumn switch
             {
                 "Email" => ascending ? query.OrderBy(x => x.Email) : query.OrderByDescending(x => x.Email),
-                "UserName" => ascending ? query.OrderBy(x => x.UserName) : query.OrderByDescending(x => x.UserName),
                 "FirstName" => ascending ? query.OrderBy(x => x.FirstName) : query.OrderByDescending(x => x.FirstName),
                 "LastName" => ascending ? query.OrderBy(x => x.LastName) : query.OrderByDescending(x => x.LastName),
                 "Role" => ascending ? query.OrderBy(x => x.Role) : query.OrderByDescending(x => x.Role),
@@ -338,6 +543,15 @@ namespace RidersApp.Services
             modelState.Remove("UserStatus");
             modelState.Remove("HasExistingPassword");
             modelState.Remove("IsLocked");
+            modelState.Remove("UserName"); // ? Remove UserName from validation since it's auto-set
+            
+            // ? For edit users, remove password validation since fields are hidden
+            if (!isNewUser)
+            {
+                modelState.Remove("Password");
+                modelState.Remove("ConfirmPassword");
+                Console.WriteLine("Password fields removed from ModelState for edit user");
+            }
             
             if (isNewUser)
             {
@@ -364,15 +578,24 @@ namespace RidersApp.Services
                     modelState.AddModelError("Password", "Password must be at least 8 characters long.");
                     Console.WriteLine("Added error: Password too short");
                 }
+
+                // ? Validate confirm password for new users
+                if (string.IsNullOrWhiteSpace(vm.ConfirmPassword))
+                {
+                    modelState.AddModelError("ConfirmPassword", "Please confirm your password.");
+                    Console.WriteLine("Added error: Confirm password required");
+                }
+                else if (vm.Password != vm.ConfirmPassword)
+                {
+                    modelState.AddModelError("ConfirmPassword", "Password and Confirm Password do not match.");
+                    Console.WriteLine("Added error: Passwords do not match");
+                }
             }
             else
             {
-                // For existing users, password is optional but if provided must meet requirements
-                if (!string.IsNullOrWhiteSpace(vm.Password) && vm.Password.Length < 8)
-                {
-                    modelState.AddModelError("Password", "Password must be at least 8 characters long.");
-                    Console.WriteLine("Added error: Password too short for existing user");
-                }
+                // ? For existing users, NO password validation since fields are hidden
+                // Password will remain unchanged when editing user information
+                Console.WriteLine("No password validation for edit user - password fields are hidden");
             }
         }
 
@@ -382,15 +605,18 @@ namespace RidersApp.Services
             
             if (isNewUser)
             {
-                // For new users, preserve password on validation errors
+                // For new users, preserve password and confirm password on validation errors
                 vm.Password = originalPassword;
-                Console.WriteLine("Password preserved for new user");
+                // Don't preserve confirm password for security - let user re-enter
+                vm.ConfirmPassword = string.Empty;
+                Console.WriteLine("Password preserved for new user, confirm password cleared");
             }
             else
             {
-                // For edit operations, clear password for security
+                // ? For edit operations, clear password fields completely since they're hidden
                 vm.Password = string.Empty;
-                Console.WriteLine("Password cleared for existing user");
+                vm.ConfirmPassword = string.Empty;
+                Console.WriteLine("Password and confirm password cleared for existing user (fields are hidden)");
             }
         }
     }
