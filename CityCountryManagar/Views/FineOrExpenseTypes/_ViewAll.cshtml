@@ -1,0 +1,38 @@
+@model List<RidersApp.ViewModels.FineOrExpenseTypeVM>
+
+<table class="table table-dark table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th class="actions-column">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>
+                    <div class="btn-action-container">
+                        <a onclick="showInPopup('@Url.Action("AddOrEdit", "FineOrExpenseTypes")?id=@item.Id', 'Edit Fine/Expense Type')"
+                           class="btn-action-edit" title="Edit Fine/Expense Type">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a onclick="deleteRecord('FineOrExpenseTypes', @item.Id)"
+                           class="btn-action-delete" title="Delete Fine/Expense Type">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-4">
+        <h5 class="text-muted">No Fine/Expense Types found</h5>
+        <p class="text-muted">Click "Add New" to create your first Fine/Expense Type.</p>
+    </div>
+}

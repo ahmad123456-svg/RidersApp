@@ -81,11 +81,20 @@ namespace RidersApp.Controllers
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", ex.Message);
+                    // Check if error is related to duplicate email
+                    if (ex.Message.Contains("already exists"))
+                    {
+                        ModelState.AddModelError("Email", ex.Message);
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "An error occurred while saving the user. Please try again.");
+                        Console.WriteLine($"Error saving user: {ex.Message}");
+                    }
                 }
             }
             
-           
+            // Prepare data for return on validation failure
             _userService.PreparePasswordForReturn(vm, originalPassword, isNewUser);
             
             // Store confirm password in ViewBag for preservation on validation errors (new users only)

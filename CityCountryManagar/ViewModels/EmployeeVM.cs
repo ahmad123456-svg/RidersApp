@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace RidersApp.ViewModels
 {
@@ -9,16 +10,16 @@ namespace RidersApp.ViewModels
 
         [Required]
         [StringLength(100)]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [StringLength(100)]
-        public string FatherName { get; set; }
+        public string FatherName { get; set; } = string.Empty;
 
         [StringLength(20)]
-        public string PhoneNo { get; set; }
+        public string PhoneNo { get; set; } = string.Empty;
 
         [StringLength(200)]
-        public string Address { get; set; }
+        public string Address { get; set; } = string.Empty;
 
         [Required]
         public int CountryId { get; set; }
@@ -26,14 +27,19 @@ namespace RidersApp.ViewModels
         [Required]
         public int CityId { get; set; }
 
-        public string CountryName { get; set; }
+        public string CountryName { get; set; } = string.Empty;
 
-        public string CityName { get; set; }
+        public string CityName { get; set; } = string.Empty;
 
         public decimal Salary { get; set; }
         [StringLength(20)]
-        public string Vehicle { get; set; }
+        public string Vehicle { get; set; } = string.Empty;
         [StringLength(30)]
-        public string VehicleNumber { get; set; }
+        public string VehicleNumber { get; set; } = string.Empty;
+        
+        // Picture related properties
+        public string? Picture { get; set; } // Current picture path
+        public IFormFile? PictureFile { get; set; } // File upload field
+        public string PictureUrl => !string.IsNullOrEmpty(Picture) ? Picture : "/Image/download.png"; // Default image fallback
     }
 }

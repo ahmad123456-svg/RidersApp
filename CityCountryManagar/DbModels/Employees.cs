@@ -32,5 +32,7 @@ namespace RidersApp.DbModels
         public string Vehicle { get; set; }
         [StringLength(30)]
         public string VehicleNumber { get; set; }
+        [StringLength(500)]
+        public string? Picture { get; set; } // Picture file path, nullable for default image
     }
 }

@@ -113,7 +113,11 @@ namespace RidersApp.Services
                 _ => ascending ? query.OrderBy(x => x.Name) : query.OrderByDescending(x => x.Name)
             };
 
-            var pageData = query.Skip(start).Take(length).ToList();
+            var pageData = query.Skip(start).Take(length).Select(x => new
+            {
+                name = x.Name,
+                countryId = x.CountryId
+            }).ToList();
 
             return new
             {

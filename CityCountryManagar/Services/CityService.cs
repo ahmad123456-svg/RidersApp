@@ -141,7 +141,13 @@ namespace RidersApp.Services
                 _ => ascending ? query.OrderBy(x => x.CityName) : query.OrderByDescending(x => x.CityName)
             };
 
-            var pageData = query.Skip(start).Take(length).ToList();
+            var pageData = query.Skip(start).Take(length).Select(x => new
+            {
+                cityName = x.CityName,
+                postalCode = x.PostalCode,
+                countryName = x.CountryName,
+                cityId = x.CityId
+            }).ToList();
 
             return new
             {

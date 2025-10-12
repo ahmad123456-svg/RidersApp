@@ -1,7 +1,7 @@
 ﻿@using RidersApp.ViewModels
 @model IEnumerable<CityVM>
 
-<table id="citiesTable" class="table table-striped table-hover datatable">
+<table id="citiesTable" class="table table-dark table-striped table-hover datatable">
     <thead>
         <tr>
             <th>City Name</th>
@@ -18,8 +18,16 @@
                 <td>@item.PostalCode</td>
                 <td>@item.CountryName</td>
                 <td>
-                    <a onclick="showInPopup('@Url.Action("AddOrEdit", "Cities", new { id = item.CityId })', 'Edit City')" class="btn btn-primary btn-sm text-white">Edit</a>
-                    <a onclick="deleteRecord('Cities', @item.CityId)" class="btn btn-danger btn-sm">Delete</a>
+                    <div class="btn-action-container">
+                        <a onclick="showInPopup('@Url.Action("AddOrEdit", "Cities", new { id = item.CityId })', 'Edit City')" 
+                           class="btn-action-edit" title="Edit City">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a onclick="deleteRecord('Cities', @item.CityId)" 
+                           class="btn-action-delete" title="Delete City">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                    </div>
                 </td>
             </tr>
         }

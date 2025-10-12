@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Identity;
 using RidersApp.Areas.Identity.Data;
 using RidersApp.IServices;
 using RidersApp.Services; // Your custom user class
+using RidersApp.AutoMapper;
+using RidersApp.Utilities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,6 +56,10 @@ builder.Services.AddScoped<IDailyRidesService, DailyRidesService>();
 builder.Services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
 builder.Services.AddScoped<IConfigurationService, ConfigurationService>();
 builder.Services.AddScoped<IUserService, UserService>(); // ✅ Added IUserService and UserService
+builder.Services.AddScoped<IFineOrExpenseTypeRepository, FineOrExpenseTypeRepository>(); // Register FineOrExpenseType repository
+builder.Services.AddScoped<IFineOrExpenseTypeService, FineOrExpenseTypeService>(); // Register FineOrExpenseType service
+builder.Services.AddScoped<IFineOrExpenseRepository, FineOrExpenseRepository>(); // Register FineOrExpense repository
+builder.Services.AddScoped<IFineOrExpenseService, FineOrExpenseService>(); // Register FineOrExpense service
 
 // ✅ Add HttpContextAccessor for accessing current user in services
 builder.Services.AddHttpContextAccessor();
@@ -63,6 +69,9 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Identity/Account/Login";
 });
+
+// Add AutoMapper
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
 // MVC and Razor support
 builder.Services.AddControllersWithViews();
@@ -275,6 +284,23 @@ using (var scope3 = app.Services.CreateScope())
     catch (Exception ex)
     {
         Console.WriteLine("Warning: could not seed Configurations: " + ex.Message);
+    }
+}
+
+// Update employee pictures to default if NULL
+using (var scope4 = app.Services.CreateScope())
+{
+    try
+    {
+        var services = scope4.ServiceProvider;
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        
+        await DatabaseUpdater.UpdateEmployeePicturesAsync(context);
+        Console.WriteLine("✅ Employee pictures updated successfully");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Warning: could not update employee pictures: {ex.Message}");
     }
 }
 

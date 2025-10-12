@@ -1,0 +1,157 @@
+@model RidersApp.ViewModels.FineOrExpenseVM
+@{
+    ViewData["Title"] = "Fine/Expenses";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h4 class="mb-0">Fine/Expenses</h4>
+        <div>
+            <button type="button" class="btn btn-crud-success show-form-modal" 
+                    data-url="@Url.Action("AddOrEdit", "FineOrExpenses")" 
+                    data-title="Add Fine/Expense">
+                <i class="fas fa-plus"></i> Add New
+            </button>
+        </div>
+    </div>
+
+    <div id="view-all">
+        <table id="fineOrExpensesTable" class="table table-dark table-striped table-hover datatable">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                    <th>Entry Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize modal
+            var formModal = new bootstrap.Modal(document.getElementById('form-modal'), {
+                backdrop: 'static',
+                keyboard: false
+            });
+
+            // Initialize DataTable with server-side processing
+            var table = $('#fineOrExpensesTable').DataTable({
+                processing: true,
+                serverSide: true,
+                language: {
+                    processing: "Please wait...",
+                    search: "Search:",
+                    paginate: { previous: "Previous", next: "Next" }
+                },
+                ajax: {
+                    url: '@Url.Action("GetFineOrExpensesData", "FineOrExpenses")',
+                    type: 'POST'
+                },
+                columns: [
+                    { data: 'employeeName' },
+                    { data: 'fineOrExpenseTypeName' },
+                    { 
+                        data: 'amount',
+                        render: function (data, type, row) {
+                            return '$' + parseFloat(data).toFixed(2);
+                        }
+                    },
+                    { data: 'description' },
+                    { 
+                        data: 'entryDate',
+                        render: function (data, type, row) {
+                            var date = new Date(data);
+                            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                        }
+                    },
+                    {
+                        data: 'id',
+                        orderable: false,
+                        searchable: false,
+                        render: function (data, type, row) {
+                            return `
+                                <div class="btn-group-modern" role="group">
+                                    <button type="button" class="btn btn-action-edit edit-btn" 
+                                            data-url="@Url.Action("AddOrEdit", "FineOrExpenses")?id=${data}" 
+                                            data-title="Edit Fine/Expense"
+                                            title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-action-delete delete-btn" 
+                                            data-controller="FineOrExpenses" 
+                                            data-id="${data}"
+                                            title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    }
+                ],
+                paging: true,
+                pageLength: 25,
+                lengthChange: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                order: [[4, "desc"]] // Order by Entry Date descending
+            });
+        });
+
+        // Override the reloadActiveDataTable function to reload FineOrExpenses table
+        window.reloadActiveDataTable = function() {
+            console.log('Reloading FineOrExpenses DataTable');
+            var table = $('#fineOrExpensesTable').DataTable();
+            if (table && table.ajax) {
+                table.ajax.reload(null, false);
+                console.log('DataTable reloaded successfully');
+                return true;
+            }
+            console.log('DataTable not found or no ajax reload available');
+            return false;
+        };
+
+        // Handle modal trigger buttons (prevent multiple bindings)
+        $(document).off('click', '.show-form-modal, .edit-btn').on('click', '.show-form-modal, .edit-btn', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const url = $(this).data('url');
+            const title = $(this).data('title');
+            if (url) {
+                showInPopup(url, title);
+            }
+            
+            return false;
+        });
+
+        // Handle delete buttons (prevent multiple bindings)
+        $(document).off('click', '.delete-btn').on('click', '.delete-btn', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Check if button is already disabled
+            if ($(this).prop('disabled')) {
+                return false;
+            }
+            
+            const controller = $(this).data('controller');
+            const id = $(this).data('id');
+            if (controller && id) {
+                deleteRecord(controller, id);
+            }
+            
+            return false;
+        });
+    </script>
+}

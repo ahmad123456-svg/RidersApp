@@ -1,7 +1,7 @@
 @using RidersApp.ViewModels
 @model IEnumerable<DailyRidesVM>
 
-<table id="dailyRidesTable" class="table table-striped table-hover datatable">
+<table id="dailyRidesTable" class="table table-dark table-striped table-hover datatable">
     <thead>
         <tr>
             <th>Employee</th>
@@ -30,8 +30,16 @@
                 <td>@item.TodayRides</td>
                 <td>@item.TotalRides</td>
                 <td>
-                    <a onclick="showInPopup('@Url.Action("AddOrEdit", "DailyRides", new { id = item.Id })', 'Edit Daily Ride')" class="btn btn-primary btn-sm text-white">Edit</a>
-                    <a onclick="deleteRecord('DailyRides', @item.Id)" class="btn btn-danger btn-sm">Delete</a>
+                    <div class="btn-action-container">
+                        <a onclick="showInPopup('@Url.Action("AddOrEdit", "DailyRides", new { id = item.Id })', 'Edit Daily Ride')" 
+                           class="btn-action-edit" title="Edit Daily Ride">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a onclick="deleteRecord('DailyRides', @item.Id)" 
+                           class="btn-action-delete" title="Delete Daily Ride">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                    </div>
                 </td>
             </tr>
         }

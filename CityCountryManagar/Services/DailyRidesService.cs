@@ -111,7 +111,19 @@ namespace RidersApp.Services
                 _ => ascending ? query.OrderBy(x => x.EntryDate) : query.OrderByDescending(x => x.EntryDate)
             };
 
-            var pageData = query.Skip(start).Take(length).ToList();
+            var pageData = query.Skip(start).Take(length).Select(x => new
+            {
+                employeeName = x.EmployeeName,
+                entryDate = x.EntryDate,
+                creditAmount = x.CreditAmount,
+                creditWAT = x.CreditWAT,
+                cashAmount = x.CashAmount,
+                cashWAT = x.CashWAT,
+                expense = x.Expense,
+                todayRides = x.TodayRides,
+                totalRides = x.TotalRides,
+                id = x.Id
+            }).ToList();
 
             return new
             {

@@ -1,13 +1,14 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using RidersApp.Areas.Identity.Data;
 using RidersApp.ViewModels;
 using RidersApp.IServices;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Linq;
-using Microsoft.AspNetCore.Identity;
-using RidersApp.Areas.Identity.Data;
-using System;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace RidersApp.Services
 {
@@ -101,6 +102,13 @@ namespace RidersApp.Services
             // ? Set UserName to Email automatically
             vm.UserName = vm.Email;
             
+            // Check if email already exists
+            var existingUser = await _userManager.FindByEmailAsync(vm.Email);
+            if (existingUser != null)
+            {
+                throw new Exception($"A user with email '{vm.Email}' already exists.");
+            }
+
             var user = new RidersAppUser
             {
                 UserName = vm.Email, // Use Email as UserName
@@ -162,6 +170,16 @@ namespace RidersApp.Services
             // ? Set UserName to Email for consistency
             vm.UserName = vm.Email;
             
+            // Check if email is being changed and if new email already exists
+            if (user.Email != vm.Email)
+            {
+                var existingUser = await _userManager.FindByEmailAsync(vm.Email);
+                if (existingUser != null && existingUser.Id != vm.Id)
+                {
+                    throw new Exception($"A user with email '{vm.Email}' already exists.");
+                }
+            }
+
             // Update basic properties
             user.UserName = vm.Email; // Use Email as UserName
             user.Email = vm.Email;
@@ -511,7 +529,17 @@ namespace RidersApp.Services
                 _ => ascending ? query.OrderBy(x => x.Email) : query.OrderByDescending(x => x.Email)
             };
 
-            var pageData = query.Skip(start).Take(length).ToList();
+            var pageData = query.Skip(start).Take(length).Select(x => new
+            {
+                id = x.Id,
+                email = x.Email,
+                firstName = x.FirstName,
+                lastName = x.LastName,
+                role = x.Role,
+                userStatus = x.UserStatus,
+                isLocked = x.IsLocked,
+                emailConfirmed = x.EmailConfirmed
+            }).ToList();
 
             return new
             {

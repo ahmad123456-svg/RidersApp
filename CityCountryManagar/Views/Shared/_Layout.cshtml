@@ -12,11 +12,82 @@
     <title>@ViewData["Title"] - Riders App</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/navbar.css" asp-append-version="true" /> <!-- New CSS -->
+    <link rel="stylesheet" href="~/RidersApp.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/datatables.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/crud-buttons.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/table-styles.css" asp-append-version="true" />
+    <style>
+        /* User Info Styles */
+        .user-info {
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        .user-name {
+            font-weight: 500;
+            margin-right: 0.5rem;
+        }
+
+        /* Custom Validation Styles */
+        .form-control.is-invalid,
+        .form-select.is-invalid {
+            border-color: #dc3545;
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 5.8 4.4 4.4'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+
+        .form-control.is-valid,
+        .form-select.is-valid {
+            border-color: #198754;
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='m2.3 6.73.94-.94 1.97 1.97 3.97-3.97.94.94L4.23 9.67z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+
+        .invalid-feedback {
+            display: block;
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 0.875em;
+            color: #dc3545;
+        }
+
+        .form-control.is-invalid ~ .invalid-feedback,
+        .form-select.is-invalid ~ .invalid-feedback {
+            display: block;
+        }
+
+        .validation-message {
+            font-size: 0.875em;
+            margin-top: 0.25rem;
+        }
+
+        #validationSummary {
+            margin-top: 1rem;
+        }
+
+        #validationSummary ul {
+            margin-bottom: 0;
+            padding-left: 1.5rem;
+        }
+
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+    </style>
+    <link rel="stylesheet" href="~/css/navbar.css" asp-append-version="true" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
     <link rel="stylesheet" href="//cdn.datatables.net/2.3.3/css/dataTables.dataTables.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body>
     <style>
         body {
             font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
@@ -116,12 +187,11 @@
             opacity: 0.8;
         }
     </style>
-</head>
-<body>
+
     <header>
         @* ✅ Hide navbar on Login and Register pages *@
-        @if (!(Context.Request.Path.Value.Contains("/Account/Login")
-                || Context.Request.Path.Value.Contains("/Account/Register")))
+        @if (!(Context.Request.Path.Value?.Contains("/Account/Login") == true
+                || Context.Request.Path.Value?.Contains("/Account/Register") == true))
         {
             <nav class="navbar navbar-expand-lg custom-navbar">
                 <div class="container-fluid">
@@ -134,21 +204,33 @@
                     </button>
 
                     <div class="collapse navbar-collapse" id="navbarNav">
-                        @if (User.Identity.IsAuthenticated)
+                        @if (User.Identity?.IsAuthenticated == true)
                         {
                             <ul class="navbar-nav ms-auto">
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
-                                </li>
+                                
                                 
                                 @* Admin users can see all menu items *@
                                 @if (User.IsInRole("Admin"))
                                 {
-                                    <li class="nav-item">
-                                        <a class="nav-link" asp-controller="Cities" asp-action="Index">Cities</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" asp-controller="Countries" asp-action="Index">Countries</a>
+                                    @* Combined City & Country Dropdown *@
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="#" id="locationDropdown" role="button"
+                                           data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="fas fa-map-marker-alt me-1"></i> Locations
+                                        </a>
+                                        <ul class="dropdown-menu" aria-labelledby="locationDropdown">
+                                            <li>
+                                                <a class="dropdown-item" asp-controller="Countries" asp-action="Index">
+                                                    <i class="fas fa-flag me-2"></i> Countries
+                                                </a>
+                                               
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" asp-controller="Cities" asp-action="Index">
+                                                    <i class="fas fa-city me-2"></i> Cities
+                                                </a>
+                                            </li>
+                                        </ul>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link" asp-controller="Employees" asp-action="Index">Employees</a>
@@ -158,6 +240,25 @@
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link" asp-controller="Configurations" asp-action="Index">Configurations</a>
+                                    </li>
+                                    @* Combined Expense Types & Fine/Expenses Dropdown *@
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="#" id="expenseDropdown" role="button"
+                                           data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="fas fa-money-bill-wave me-1"></i> Expenses
+                                        </a>
+                                        <ul class="dropdown-menu" aria-labelledby="expenseDropdown">
+                                            <li>
+                                                <a class="dropdown-item" asp-controller="FineOrExpenseTypes" asp-action="Index">
+                                                    <i class="fas fa-tags me-2"></i> Expense Types
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" asp-controller="FineOrExpenses" asp-action="Index">
+                                                    <i class="fas fa-receipt me-2"></i> Fine/Expenses
+                                                </a>
+                                            </li>
+                                        </ul>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link text-dark" asp-controller="Users" asp-action="Index">Users</a>
@@ -179,7 +280,7 @@
                                        data-bs-toggle="dropdown" aria-expanded="false">
                                         <img src="~/Image/download.png" 
                                              alt="Profile" class="rounded-circle me-2 user-profile-image" width="32" height="32"
-                                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiMwMDdiZmYiLz4KPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1zbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggNkM5LjEwNDU3IDYgMTAgNi44OTU0MyAxMCA4QzEwIDkuMTA0NTcgOS4xMDQ1NyAxMCA4IDEwQzYuODk1NDMgMTAgNiA5LjEwNDU3IDYgOEM2IDYuODk1NDMgNi44OTU0MyA2IDggNloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik04IDEyQzUuNzkwODYgMTIgNCAxMy43OTA4NiA0IDE2SDEyQzEyIDEzLjc5MDg2IDEwLjIwOTEgMTIgOCAxMloiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo8L3N2Zz4K';">
+                                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiMwMDdiZmYiLz4KPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1zbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggNkM5LjEwNDU3IDYgMTAgNi44OTU0MyAxMCA4QzEwIDkuMTA0NTcgOS4xMDQ1NyAxMCA4IDEwQzYuODk1NDMgMTAgNiA5LjEwNDU3IDYgOEM2IDYuODk1NDMgNi44OTU0MyA2IDggNloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik08IDEyQzUuNzkwODYgMTIgNCAxMy43OTA4NiA0IDE2SDEyQzEyIDEzLjc5MDg2IDEwLjIwOTEgMTIgOCAxMloiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo8L3N2Zz4K';">
                                         <span class="user-name">@UserManager.GetUserName(User)</span>
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end user-dropdown" aria-labelledby="userProfileDropdown">
@@ -258,6 +359,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Toast container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3"></div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

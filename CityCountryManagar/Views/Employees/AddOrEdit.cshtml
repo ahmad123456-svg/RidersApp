@@ -7,7 +7,21 @@
     bool cityHasItems = cityItems != null && cityItems.Any();
 }
 
-<form asp-action="AddOrEdit" asp-controller="Employees" method="post" onsubmit="return ajaxFormSubmit(this);">
+<form asp-action="AddOrEdit" asp-controller="Employees" method="post" enctype="multipart/form-data" onsubmit="return ajaxFormSubmit(this);">
+    
+    <!-- Picture Upload Section -->
+    <div class="form-group text-center mb-3">
+        <label class="form-label">Employee Picture</label>
+        <div class="mb-2">
+            <img id="picturePreview" src="@Model.PictureUrl" alt="Employee Picture" 
+                 style="width: 120px; height: 120px; object-fit: cover; border-radius: 50%; border: 3px solid #ddd;" />
+        </div>
+        <input asp-for="PictureFile" class="form-control" type="file" accept="image/*" onchange="previewImage(this)" />
+        <small class="form-text text-muted">Upload JPG, PNG, or GIF (Max 5MB). Leave empty for default picture.</small>
+        <span asp-validation-for="PictureFile" class="text-danger"></span>
+        <input type="hidden" asp-for="Picture" />
+    </div>
+
     <div class="form-group">
         <label asp-for="Name"></label>
         <input asp-for="Name" class="form-control" />
@@ -72,6 +86,23 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
+        // Image preview function
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    $('#picturePreview').attr('src', e.target.result);
+                }
+                
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                // If no file selected, show the original image (could be default or existing employee picture)
+                var originalSrc = '@Model.PictureUrl';
+                $('#picturePreview').attr('src', originalSrc);
+            }
+        }
+
         $(document).ready(function () {
             // server-provided flag
             var cityHasItems = @((cityHasItems) ? "true" : "false");

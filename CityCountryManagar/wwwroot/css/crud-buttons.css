@@ -1,0 +1,327 @@
+/* CRUD Button Styles - Modern Gradient Buttons for all models */
+
+/* Container for action buttons */
+.btn-action-container,
+.btn-group-modern {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Base button styles */
+.btn-crud,
+.btn-action-edit,
+.btn-action-delete,
+.btn-action-warning,
+.btn-action-info,
+.btn-modern-edit,
+.btn-modern-delete,
+.btn-modern-warning,
+.btn-modern-info {
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    cursor: pointer;
+    text-align: center;
+    min-width: 80px;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Edit Button - Beautiful Blue Gradient */
+.btn-action-edit,
+.btn-modern-edit,
+.btn-crud-edit {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed, #2563eb);
+    color: white;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+}
+
+.btn-action-edit:hover,
+.btn-modern-edit:hover,
+.btn-crud-edit:hover {
+    background: linear-gradient(135deg, #3730a3, #5b21b6, #1d4ed8);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.6);
+    color: white;
+    text-decoration: none;
+}
+
+/* Delete Button - Beautiful Red Gradient */
+.btn-action-delete,
+.btn-modern-delete,
+.btn-crud-delete {
+    background: linear-gradient(135deg, #ef4444, #dc2626, #f97316);
+    color: white;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+}
+
+.btn-action-delete:hover,
+.btn-modern-delete:hover,
+.btn-crud-delete:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c, #ea580c);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.6);
+    color: white;
+    text-decoration: none;
+}
+
+/* Warning Button - Beautiful Orange/Yellow Gradient */
+.btn-action-warning,
+.btn-modern-warning,
+.btn-crud-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706, #f97316);
+    color: white;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+}
+
+.btn-action-warning:hover,
+.btn-modern-warning:hover,
+.btn-crud-warning:hover {
+    background: linear-gradient(135deg, #d97706, #b45309, #ea580c);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.6);
+    color: white;
+    text-decoration: none;
+}
+
+/* Info Button - Beautiful Teal Gradient */
+.btn-action-info,
+.btn-modern-info,
+.btn-crud-info {
+    background: linear-gradient(135deg, #06b6d4, #0891b2, #0284c7);
+    color: white;
+    box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+}
+
+.btn-action-info:hover,
+.btn-modern-info:hover,
+.btn-crud-info:hover {
+    background: linear-gradient(135deg, #0891b2, #0e7490, #0369a1);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(6, 182, 212, 0.6);
+    color: white;
+    text-decoration: none;
+}
+
+/* Success Button - Beautiful Green Gradient */
+.btn-crud-success {
+    background: linear-gradient(135deg, #10b981, #059669, #16a34a);
+    color: white;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    padding: 10px 20px;
+    font-size: 16px;
+}
+
+.btn-crud-success:hover {
+    background: linear-gradient(135deg, #059669, #047857, #15803d);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.6);
+    color: white;
+    text-decoration: none;
+}
+
+/* Small button variants */
+.btn-crud-sm,
+.btn-action-edit.btn-sm,
+.btn-action-delete.btn-sm,
+.btn-action-warning.btn-sm,
+.btn-action-info.btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+    min-width: 70px;
+}
+
+/* Icon spacing in buttons */
+.btn-crud i,
+.btn-modern-edit i,
+.btn-modern-delete i,
+.btn-modern-warning i,
+.btn-modern-info i,
+.btn-action-edit i,
+.btn-action-delete i,
+.btn-action-warning i,
+.btn-action-info i {
+    margin-right: 4px;
+    font-size: 13px;
+}
+
+/* Button group spacing */
+.btn-group-modern .btn,
+.btn-action-container .btn,
+.btn-action-container a {
+    margin: 0 3px;
+}
+
+/* Active/Focus states */
+.btn-crud:focus,
+.btn-modern-edit:focus,
+.btn-modern-delete:focus,
+.btn-modern-warning:focus,
+.btn-modern-info:focus,
+.btn-action-edit:focus,
+.btn-action-delete:focus,
+.btn-action-warning:focus,
+.btn-action-info:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3);
+}
+
+/* Pulse animation on click */
+.btn-crud:active,
+.btn-modern-edit:active,
+.btn-modern-delete:active,
+.btn-modern-warning:active,
+.btn-modern-info:active,
+.btn-action-edit:active,
+.btn-action-delete:active,
+.btn-action-warning:active,
+.btn-action-info:active {
+    animation: pulse 0.3s ease-in-out;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1) translateY(-3px); }
+    50% { transform: scale(0.98) translateY(-2px); }
+    100% { transform: scale(1) translateY(-3px); }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .btn-action-container,
+    .btn-group-modern {
+        flex-direction: column;
+        gap: 6px;
+    }
+    
+    .btn-crud,
+    .btn-modern-edit,
+    .btn-modern-delete,
+    .btn-modern-warning,
+    .btn-modern-info,
+    .btn-action-edit,
+    .btn-action-delete,
+    .btn-action-warning,
+    .btn-action-info {
+        width: 100%;
+        min-width: auto;
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+    
+    .btn-crud-sm {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+}
+
+/* Disabled state */
+.btn-crud:disabled,
+.btn-modern-edit:disabled,
+.btn-modern-delete:disabled,
+.btn-modern-warning:disabled,
+.btn-modern-info:disabled,
+.btn-action-edit:disabled,
+.btn-action-delete:disabled,
+.btn-action-warning:disabled,
+.btn-action-info:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Loading state */
+.btn-crud.loading,
+.btn-modern-edit.loading,
+.btn-modern-delete.loading,
+.btn-modern-warning.loading,
+.btn-modern-info.loading,
+.btn-action-edit.loading,
+.btn-action-delete.loading,
+.btn-action-warning.loading,
+.btn-action-info.loading {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.btn-crud.loading::after,
+.btn-modern-edit.loading::after,
+.btn-modern-delete.loading::after,
+.btn-modern-warning.loading::after,
+.btn-modern-info.loading::after,
+.btn-action-edit.loading::after,
+.btn-action-delete.loading::after,
+.btn-action-warning.loading::after,
+.btn-action-info.loading::after {
+    content: "";
+    width: 16px;
+    height: 16px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s ease-in-out infinite;
+    margin-left: 8px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Override Bootstrap default button styles when using our classes */
+.btn.btn-action-edit,
+.btn.btn-action-delete,
+.btn.btn-action-warning,
+.btn.btn-action-info,
+.btn.btn-modern-edit,
+.btn.btn-modern-delete,
+.btn.btn-modern-warning,
+.btn.btn-modern-info {
+    border: none !important;
+}
+
+/* Ensure consistent styling for anchor tags used as buttons */
+a.btn-action-edit,
+a.btn-action-delete,
+a.btn-action-warning,
+a.btn-action-info,
+a.btn-modern-edit,
+a.btn-modern-delete,
+a.btn-modern-warning,
+a.btn-modern-info {
+    text-decoration: none;
+    color: white;
+}
+
+a.btn-action-edit:hover,
+a.btn-action-delete:hover,
+a.btn-action-warning:hover,
+a.btn-action-info:hover,
+a.btn-modern-edit:hover,
+a.btn-modern-delete:hover,
+a.btn-modern-warning:hover,
+a.btn-modern-info:hover {
+    text-decoration: none;
+    color: white;
+}
+
+/* Special styling for warning buttons text color */
+a.btn-action-warning,
+a.btn-modern-warning {
+    color: white;
+}
+
+a.btn-action-warning:hover,
+a.btn-modern-warning:hover {
+    color: white;
+}

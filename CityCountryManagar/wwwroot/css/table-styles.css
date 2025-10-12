@@ -1,0 +1,69 @@
+/* Table column widths */
+.table-column-xs {
+    width: 80px;
+}
+
+.table-column-sm {
+    width: 100px;
+}
+
+.table-column-md {
+    width: 120px;
+}
+
+.table-column-lg {
+    width: 150px;
+}
+
+.table-column-xl {
+    width: 200px;
+}
+
+.table-column-xxl {
+    width: 300px;
+}
+
+/* Badge styles */
+.badge-dark {
+    background-color: black;
+    color: white;
+}
+
+/* Image styles */
+.img-profile-sm {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.img-profile-md {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.img-profile-lg {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #ddd;
+}
+
+/* Alert styles */
+.alert-floating {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 10000;
+    min-width: 350px;
+    max-width: 500px;
+}
+
+/* Loading spinner container */
+.loading-container {
+    text-align: center;
+    padding: 2rem 0;
+}

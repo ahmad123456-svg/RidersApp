@@ -4,31 +4,35 @@
     ViewData["Title"] = "Employees";
 }
 
-<div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-2">
         <h4 class="mb-0">Employees</h4>
         <div>
-            <button class="btn btn-success" onclick="showInPopup('@Url.Action("AddOrEdit", "Employees")', 'Add Employee')">Add New</button>
+            <button class="btn btn-crud-success" onclick="showInPopup('@Url.Action("AddOrEdit", "Employees")', 'Add Employee')">
+                <i class="fas fa-plus"></i> Add New
+            </button>
         </div>
     </div>
     <div id="view-all">
-        <table id="employeesTable" class="table table-striped table-hover datatable">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Father Name</th>
-                    <th>Phone No</th>
-                    <th>Address</th>
-                    <th>Country</th>
-                    <th>City</th>
-                    <th>Salary</th>
-                    <th>Vehicle</th>
-                    <th>Vehicle Number</th>
-                    <th style="width:200px;">Actions</th>
-                </tr>
-            </thead>
+        <div class="table-responsive">
+            <table id="employeesTable" class="table table-dark table-striped table-hover datatable">
+                <thead>
+                    <tr>
+                        <th class="table-column-xs">Picture</th>
+                        <th class="table-column-md">Name</th>
+                        <th class="table-column-md">Father Name</th>
+                        <th class="table-column-lg">Phone No</th>
+                        <th class="table-column-lg">Address</th>
+                        <th class="table-column-sm">Country</th>
+                        <th class="table-column-sm">City</th>
+                        <th class="table-column-md">Salary</th>
+                        <th class="table-column-xs">Vehicle</th>
+                        <th class="table-column-sm">Vehicle Number</th>
+                        <th class="table-column-xl">Actions</th>
+                    </tr>
+                </thead>
             <tbody></tbody>
         </table>
+        </div>
     </div>
 </div>
 
@@ -52,27 +56,47 @@
                     type: 'POST'
                 },
                 columns: [
-                    { data: 'name' },
-                    { data: 'fatherName' },
-                    { data: 'phoneNo' },
-                    { data: 'address' },
-                    { data: 'countryName' },
-                    { data: 'cityName' },
-                    { data: 'salary' },
-                    { data: 'vehicle' },
-                    { data: 'vehicleNumber' },
+                    { 
+                        data: 'picture',
+                        width: '80px',
+                        orderable: false,
+                        searchable: false,
+                        render: function (data, type, row) {
+                            var imageUrl = data && data !== '' ? data : '/Image/download.png';
+                            return `<img src="${imageUrl}" alt="Employee" class="img-profile-sm" />`;
+                        }
+                    },
+                    { data: 'name', width: '120px' },
+                    { data: 'fatherName', width: '120px' },
+                    { data: 'phoneNo', width: '130px' },
+                    { data: 'address', width: '150px' },
+                    { data: 'countryName', width: '100px' },
+                    { data: 'cityName', width: '100px' },
+                    { data: 'salary', width: '120px' },
+                    { data: 'vehicle', width: '80px' },
+                    { data: 'vehicleNumber', width: '100px' },
                     {
                         data: 'employeeId',
+                        width: '160px',
                         orderable: false,
                         searchable: false,
                         render: function (data, type, row) {
                             return `
-                                <a class="btn btn-primary btn-sm text-white" onclick="showInPopup('@Url.Action("AddOrEdit", "Employees")?id=${data}', 'Edit Employee')">Edit</a>
-                                <a class="btn btn-danger btn-sm" onclick="deleteRecord('Employees', ${data})">Delete</a>
+                                <div class="btn-group-modern" role="group">
+                                    <button class="btn btn-action-edit" onclick="showInPopup('@Url.Action("AddOrEdit", "Employees")?id=${data}', 'Edit Employee')" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-action-delete" onclick="deleteRecord('Employees', ${data})" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
                             `;
                         }
                     }
                 ],
+                responsive: true,
+                scrollX: true,
+                autoWidth: false,
                 paging: true,
                 pageLength: 25,
                 lengthChange: true,

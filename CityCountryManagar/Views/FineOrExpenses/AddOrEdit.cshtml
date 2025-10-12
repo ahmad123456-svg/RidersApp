@@ -1,0 +1,548 @@
+@model RidersApp.ViewModels.FineOrExpenseVM
+
+<form id="fineOrExpenseForm" asp-action="AddOrEdit" asp-controller="FineOrExpenses" asp-route-id="@Model.Id" method="post" autocomplete="off" novalidate>
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="Id" value="@Model.Id" />
+    
+    <div class="modal-body">
+        <!-- Validation Summary -->
+        <div class="alert alert-danger d-none" id="validationSummary">
+            <ul id="validationList"></ul>
+        </div>
+        
+        <!-- Employee Selection -->
+        <div class="form-group mb-3">
+            <label asp-for="EmployeeId" class="form-label">Employee <span class="text-danger">*</span></label>
+            <select asp-for="EmployeeId" class="form-select" asp-items="ViewBag.Employees" id="EmployeeId">
+                <option value="">-- Select Employee --</option>
+            </select>
+            <span asp-validation-for="EmployeeId" class="text-danger validation-message"></span>
+            <div class="invalid-feedback"></div>
+        </div>
+
+        <!-- Fine/Expense Type Selection -->
+        <div class="form-group mb-3">
+            <label asp-for="FineOrExpenseTypeId" class="form-label">Fine/Expense Type <span class="text-danger">*</span></label>
+            <select asp-for="FineOrExpenseTypeId" class="form-select" asp-items="ViewBag.FineOrExpenseTypes" id="FineOrExpenseTypeId">
+                <option value="">-- Select Type --</option>
+            </select>
+            <span asp-validation-for="FineOrExpenseTypeId" class="text-danger validation-message"></span>
+            <div class="invalid-feedback"></div>
+        </div>
+
+        <!-- Amount Input -->
+        <div class="form-group mb-3">
+            <label asp-for="Amount" class="form-label">Amount <span class="text-danger">*</span></label>
+            <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input asp-for="Amount" class="form-control" type="number" step="0.01" min="0.01" max="999999.99" 
+                       id="Amount" placeholder="0.00" />
+            </div>
+            <span asp-validation-for="Amount" class="text-danger validation-message"></span>
+            <div class="invalid-feedback"></div>
+            <small class="form-text text-muted">Enter amount between $0.01 and $999,999.99</small>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group mb-3">
+            <label asp-for="Description" class="form-label">Description <span class="text-danger">*</span></label>
+            <textarea asp-for="Description" class="form-control" rows="3" id="Description" 
+                      placeholder="Enter description (3-500 characters)" maxlength="500"></textarea>
+            <span asp-validation-for="Description" class="text-danger validation-message"></span>
+            <div class="invalid-feedback"></div>
+            <small class="form-text text-muted">
+                <span id="charCount">0</span>/500 characters
+            </small>
+        </div>
+
+        <!-- Entry Date -->
+        <div class="form-group mb-3">
+            <label asp-for="EntryDate" class="form-label">Entry Date <span class="text-danger">*</span></label>
+            <input asp-for="EntryDate" class="form-control" type="datetime-local" 
+                   value="@(Model.EntryDate == default(DateTime) ? DateTime.Now.ToString("yyyy-MM-ddTHH:mm") : Model.EntryDate.ToString("yyyy-MM-ddTHH:mm"))"
+                   id="EntryDate" name="EntryDate" />
+            <span asp-validation-for="EntryDate" class="text-danger validation-message"></span>
+            <div class="invalid-feedback"></div>
+        </div>
+
+        <!-- Validation Summary -->
+        <div id="validationSummary" class="alert alert-danger d-none">
+            <h6>Please correct the following errors:</h6>
+            <ul id="validationList"></ul>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-success" id="saveButton" onclick="submitForm()">
+            <i class="fas fa-save"></i> Save
+            <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+        </button>
+    </div>
+</form>
+
+<script>
+    $(document).ready(function() {
+        initializeFineOrExpenseForm();
+    });
+
+    // Simple form submission function
+    function submitForm() {
+        console.log('submitForm called');
+        var form = document.getElementById('fineOrExpenseForm');
+        if (form) {
+            // Prevent double clicks
+            var saveBtn = document.getElementById('saveButton');
+            if (saveBtn.disabled) {
+                console.log('Button already disabled, preventing double submission');
+                return;
+            }
+            
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            
+            // Create form data
+            var formData = new FormData(form);
+            
+            console.log('Form action:', form.action);
+            console.log('Submitting form...');
+            
+            // Submit via fetch
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'RequestVerificationToken': formData.get('__RequestVerificationToken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Response:', data);
+                
+                // Re-enable button
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> Save';
+                
+                if (data.isValid) {
+                    // Success
+                    console.log('Record saved successfully');
+                    console.log('Response data:', data);
+                    
+                    // Show success message on the same page
+                    var message = data.message || 'Record saved successfully';
+                    console.log('Showing success message:', message);
+                    
+                    // Create and show success alert directly
+                    var alertHtml = `
+                        <div class="alert alert-success alert-dismissible fade show alert-floating">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Success!</strong> ${message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    `;
+                    
+                    // Remove any existing alerts first
+                    $('.alert-success').remove();
+                    
+                    // Add the alert to the body
+                    $('body').append(alertHtml);
+                    
+                    // Auto-remove after 5 seconds
+                    setTimeout(function() {
+                        $('.alert-success').fadeOut('slow', function() {
+                            $(this).remove();
+                        });
+                    }, 5000);
+                    
+                    // Close modal immediately after showing success message
+                    console.log('Attempting to close modal...');
+                    
+                    // Use universal closeModal function
+                    if (typeof closeModal === 'function') {
+                        closeModal();
+                    } else {
+                        // Fallback if closeModal function not available
+                        var modalElement = document.getElementById('form-modal');
+                        if (modalElement) {
+                            var modal = bootstrap.Modal.getInstance(modalElement);
+                            if (modal) {
+                                modal.hide();
+                            }
+                        }
+                    }
+                    
+                    // Reload table after modal closes
+                    setTimeout(function() {
+                        if (window.reloadActiveDataTable) {
+                            console.log('Reloading data table');
+                            window.reloadActiveDataTable();
+                        }
+                    }, 1000);
+                } else {
+                    // Validation failed
+                    console.log('Validation failed:', data);
+                    
+                    if (data.html) {
+                        // Replace form content
+                        document.querySelector('#form-modal .modal-body').innerHTML = data.html;
+                        // Reinitialize
+                        initializeFineOrExpenseForm();
+                    }
+                    
+                    if (data.message) {
+                        console.log('Showing error message:', data.message);
+                        
+                        // Create and show error alert directly
+                        var alertHtml = `
+                            <div class="alert alert-danger alert-dismissible fade show" style="position: fixed; top: 80px; right: 20px; z-index: 10000; min-width: 350px; max-width: 500px;">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <strong>Error!</strong> ${data.message}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        `;
+                        
+                        // Remove any existing error alerts first
+                        $('.alert-danger').remove();
+                        
+                        // Add the alert to the body
+                        $('body').append(alertHtml);
+                        
+                        // Auto-remove after 6 seconds
+                        setTimeout(function() {
+                            $('.alert-danger').fadeOut('slow', function() {
+                                $(this).remove();
+                            });
+                        }, 6000);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> Save';
+                
+                // Show error message directly
+                var alertHtml = `
+                    <div class="alert alert-danger alert-dismissible fade show" style="position: fixed; top: 80px; right: 20px; z-index: 10000; min-width: 350px; max-width: 500px;">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <strong>Error!</strong> An error occurred while saving
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `;
+                
+                $('.alert-danger').remove();
+                $('body').append(alertHtml);
+                
+                setTimeout(function() {
+                    $('.alert-danger').fadeOut('slow', function() {
+                        $(this).remove();
+                    });
+                }, 6000);
+            });
+        }
+    }
+
+    function initializeFineOrExpenseForm() {
+        // Set current datetime if the field is empty or has default value
+        setDefaultDateTime();
+        
+        // Setup character count for description
+        setupCharacterCount();
+        
+        // Setup real-time validation
+        setupRealtimeValidation();
+    }
+
+    function setDefaultDateTime() {
+        var entryDateInput = $('#EntryDate');
+        var currentValue = entryDateInput.val();
+        
+        if (!currentValue || currentValue.startsWith('0001-01-01') || currentValue === '') {
+            var now = new Date();
+            var year = now.getFullYear();
+            var month = String(now.getMonth() + 1).padStart(2, '0');
+            var day = String(now.getDate()).padStart(2, '0');
+            var hours = String(now.getHours()).padStart(2, '0');
+            var minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            var formattedDateTime = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+            entryDateInput.val(formattedDateTime);
+        }
+    }
+
+    function setupCharacterCount() {
+        $('#Description').on('input', function() {
+            var length = $(this).val().length;
+            $('#charCount').text(length);
+            
+            if (length < 3) {
+                $('#charCount').addClass('text-danger').removeClass('text-success');
+            } else if (length > 450) {
+                $('#charCount').addClass('text-warning').removeClass('text-success text-danger');
+            } else {
+                $('#charCount').addClass('text-success').removeClass('text-danger text-warning');
+            }
+        });
+        
+        // Initialize character count
+        $('#Description').trigger('input');
+    }
+
+    function setupRealtimeValidation() {
+        // Employee validation
+        $('#EmployeeId').on('change', function() {
+            validateField('EmployeeId');
+        });
+
+        // Type validation
+        $('#FineOrExpenseTypeId').on('change', function() {
+            validateField('FineOrExpenseTypeId');
+        });
+
+        // Amount validation
+        $('#Amount').on('input blur', function() {
+            validateField('Amount');
+        });
+
+        // Description validation
+        $('#Description').on('input blur', function() {
+            validateField('Description');
+        });
+
+        // Date validation
+        $('#EntryDate').on('change blur', function() {
+            validateField('EntryDate');
+        });
+    }
+
+    function validateField(fieldName) {
+        var field = $('#' + fieldName);
+        var value = field.val();
+        var isValid = true;
+        var errorMessage = '';
+
+        // Clear previous validation
+        field.removeClass('is-invalid is-valid');
+        field.siblings('.invalid-feedback').text('');
+
+        switch (fieldName) {
+            case 'EmployeeId':
+                if (!value || value === '' || value === '0') {
+                    isValid = false;
+                    errorMessage = 'Please select an employee';
+                }
+                break;
+
+            case 'FineOrExpenseTypeId':
+                if (!value || value === '' || value === '0') {
+                    isValid = false;
+                    errorMessage = 'Please select a fine/expense type';
+                }
+                break;
+
+            case 'Amount':
+                var amount = parseFloat(value);
+                if (!value || isNaN(amount) || amount <= 0) {
+                    isValid = false;
+                    errorMessage = 'Amount is required and must be greater than 0';
+                } else if (amount < 0.01) {
+                    isValid = false;
+                    errorMessage = 'Amount must be at least $0.01';
+                } else if (amount > 999999.99) {
+                    isValid = false;
+                    errorMessage = 'Amount cannot exceed $999,999.99';
+                }
+                break;
+
+            case 'Description':
+                if (!value || value.trim().length < 3) {
+                    isValid = false;
+                    errorMessage = 'Description must be at least 3 characters';
+                } else if (value.length > 500) {
+                    isValid = false;
+                    errorMessage = 'Description cannot exceed 500 characters';
+                }
+                break;
+
+            case 'EntryDate':
+                if (!value) {
+                    isValid = false;
+                    errorMessage = 'Entry date is required';
+                } else {
+                    var entryDate = new Date(value);
+                    var now = new Date();
+                    var oneYearAgo = new Date();
+                    oneYearAgo.setFullYear(now.getFullYear() - 1);
+                    var oneYearFromNow = new Date();
+                    oneYearFromNow.setFullYear(now.getFullYear() + 1);
+
+                    if (entryDate < oneYearAgo || entryDate > oneYearFromNow) {
+                        isValid = false;
+                        errorMessage = 'Entry date must be within the last year or next year';
+                    }
+                }
+                break;
+        }
+
+        // Apply validation styling
+        if (isValid) {
+            field.addClass('is-valid').removeClass('is-invalid');
+        } else {
+            field.addClass('is-invalid').removeClass('is-valid');
+            field.siblings('.invalid-feedback').text(errorMessage);
+        }
+
+        return isValid;
+    }
+
+    function validateAndSubmitForm(form) {
+        // Clear previous validation state
+        $('#validationSummary').hide().removeClass('d-none');
+        $('#validationList').empty();
+        $('.is-invalid').removeClass('is-invalid');
+        $('.invalid-feedback').empty();
+        $('.validation-message').empty();
+
+        // Validate all fields
+        var isValid = true;
+        var errors = [];
+        var formFields = {
+            EmployeeId: { label: 'Employee', required: true },
+            FineOrExpenseTypeId: { label: 'Fine/Expense Type', required: true },
+            Amount: { label: 'Amount', required: true, min: 0.01, max: 999999.99 },
+            Description: { label: 'Description', required: true, minLength: 3, maxLength: 500 },
+            EntryDate: { label: 'Entry Date', required: true }
+        };
+
+        // Validate each field
+        for (var fieldId in formFields) {
+            if (!validateField(fieldId)) {
+                isValid = false;
+                var field = formFields[fieldId];
+                var errorMsg = $(`#${fieldId}`).siblings('.invalid-feedback').text() || 
+                             `Please provide a valid ${field.label.toLowerCase()}`;
+                errors.push(errorMsg);
+            }
+        }
+
+        // Show validation summary if there are errors
+        if (!isValid) {
+            errors.forEach(function(error) {
+                $('#validationList').append('<li>' + error + '</li>');
+            });
+            $('#validationSummary').show();
+            
+            // Focus first invalid field
+            $('.is-invalid').first().focus();
+            return false;
+        }
+
+        // Show loading state
+        var saveButton = $('#saveButton');
+        var loadingSpinner = saveButton.find('.spinner-border');
+        
+        saveButton.prop('disabled', true);
+        loadingSpinner.removeClass('d-none');
+
+        // Submit form data via AJAX
+        $.ajax({
+            type: 'POST',
+            url: $(form).attr('action'),
+            data: $(form).serialize(),
+            success: function(res) {
+                if (res.isValid) {
+                    // Show success message above the modal
+                    if (res.message) {
+                        var modalTop = $('#form-modal').offset().top;
+                        showSuccessMessage(res.message);
+                        $('.alert-success').css({
+                            'position': 'fixed',
+                            'top': (modalTop - 70) + 'px',
+                            'z-index': '1060'
+                        });
+                    }
+
+                    // Close modal and reload data with a delay
+                    setTimeout(function() {
+                        var modalElement = document.getElementById('form-modal');
+                        if (modalElement) {
+                            var modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+                            modalInstance.hide();
+                            
+                            // Reload DataTable
+                            reloadActiveDataTable();
+                            
+                            // Clear modal content after animation
+                            setTimeout(function() {
+                                $("#form-modal .modal-body").html('');
+                                $("#form-modal .modal-title").html('');
+                            }, 300);
+                        }
+                    }, 2000); // Keep modal visible for 2 seconds to show the success message
+                } else {
+                    // Show error message if present
+                    if (res.message) {
+                        showErrorMessage(res.message);
+                    }
+                    
+                    // Update form with validation errors if any
+                    if (res.html) {
+                        $("#form-modal .modal-body").html(res.html);
+                        // Re-initialize form validation
+                        if (typeof initializeFineOrExpenseForm === 'function') {
+                            initializeFineOrExpenseForm();
+                        }
+                    }
+                }
+            },
+            error: function(xhr, status, error) {
+                showErrorMessage('An error occurred while saving. Please try again.');
+                console.error('Form submission error:', error);
+            },
+            complete: function() {
+                // Reset button state
+                saveButton.prop('disabled', false);
+                loadingSpinner.addClass('d-none');
+            }
+        });
+
+        return false; // Prevent normal form submission
+    }
+
+    // Override the original ajaxFormSubmit to handle the loading state
+    var originalAjaxFormSubmit = window.ajaxFormSubmit;
+    window.ajaxFormSubmit = function(form) {
+        var result = originalAjaxFormSubmit(form);
+        
+        // Reset button state after submission
+        setTimeout(function() {
+            var saveButton = $('#saveButton');
+            saveButton.prop('disabled', false);
+            saveButton.find('.spinner-border').addClass('d-none');
+        }, 1000);
+        
+        return result;
+    };
+</script>
+
+<script>
+    $(document).ready(function() {
+        // Set current datetime if the field is empty or has default value
+        var entryDateInput = $('#EntryDate');
+        var currentValue = entryDateInput.val();
+        
+        if (!currentValue || currentValue.startsWith('0001-01-01') || currentValue === '') {
+            var now = new Date();
+            var year = now.getFullYear();
+            var month = String(now.getMonth() + 1).padStart(2, '0');
+            var day = String(now.getDate()).padStart(2, '0');
+            var hours = String(now.getHours()).padStart(2, '0');
+            var minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            var formattedDateTime = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+            entryDateInput.val(formattedDateTime);
+        }
+    });
+</script>

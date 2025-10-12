@@ -7,11 +7,13 @@
     <div class="d-flex justify-content-between align-items-center mb-2">
         <h4 class="mb-0">Daily Rides</h4>
         <div>
-            <button class="btn btn-success" onclick="showInPopup('@Url.Action("AddOrEdit", "DailyRides")', 'Add Daily Ride')">Add New</button>
+            <button class="btn btn-crud-success" onclick="showInPopup('@Url.Action("AddOrEdit", "DailyRides")', 'Add Daily Ride')">
+                <i class="fas fa-plus"></i> Add New
+            </button>
         </div>
     </div>
     <div id="view-all">
-        <table id="dailyRidesTable" class="table table-striped table-hover datatable">
+        <table id="dailyRidesTable" class="table table-dark table-striped table-hover datatable">
             <thead>
                 <tr>
                     <th>Employee</th>
@@ -23,7 +25,7 @@
                     <th>Expense</th>
                     <th>Today Rides</th>
                     <th>Total Rides</th>
-                    <th style="width:200px;">Actions</th>
+                    <th class="actions-column">Actions</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -31,13 +33,11 @@
     </div>
 </div>
 
-@* Add anti-forgery token for AJAX requests *@
 @Html.AntiForgeryToken()
 
 @section Scripts {
     <script>
         $(document).ready(function() {
-            // Initialize DataTable with server-side processing
             $('#dailyRidesTable').DataTable({
                 processing: true,
                 serverSide: true,
@@ -70,8 +70,14 @@
                         searchable: false,
                         render: function (data, type, row) {
                             return `
-                                <a class=\"btn btn-primary btn-sm text-white\" onclick=\"showInPopup('@Url.Action("AddOrEdit", "DailyRides")?id=${data}', 'Edit Daily Ride')\">Edit</a>
-                                <a class=\"btn btn-danger btn-sm\" onclick=\"deleteRecord('DailyRides', ${data})\">Delete</a>
+                                <div class="btn-group-modern" role="group">
+                                    <button class="btn btn-action-edit" onclick="showInPopup('@Url.Action("AddOrEdit", "DailyRides")?id=${data}', 'Edit Daily Ride')" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-action-delete" onclick="deleteRecord('DailyRides', ${data})" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
                             `;
                         }
                     }

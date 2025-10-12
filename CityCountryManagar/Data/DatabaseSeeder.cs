@@ -78,7 +78,8 @@ namespace RidersApp.Data
                                 CityId = randomCity.CityId,
                                 Salary = 50000 + (i * 1000),
                                 Vehicle = i % 2 == 0 ? "Car" : "Motorcycle",
-                                VehicleNumber = $"VH-{i:D3}"
+                                VehicleNumber = $"VH-{i:D3}",
+                                Picture = "/Image/download.png" // Set default picture
                             });
                         }
                     }

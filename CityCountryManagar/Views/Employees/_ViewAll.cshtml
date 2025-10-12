@@ -1,9 +1,10 @@
 @using RidersApp.ViewModels
 @model IEnumerable<EmployeeVM>
 
-<table id="employeesTable" class="table table-striped table-hover datatable">
+<table id="employeesTable" class="table table-dark table-striped table-hover datatable">
     <thead>
         <tr>
+            <th>Picture</th>
             <th>Name</th>
             <th>Father Name</th>
             <th>Phone No</th>
@@ -20,6 +21,10 @@
         @foreach (var item in Model)
         {
             <tr>
+                <td>
+                    <img src="@item.PictureUrl" alt="Employee Picture" 
+                         class="employee-profile-img" />
+                </td>
                 <td>@item.Name</td>
                 <td>@item.FatherName</td>
                 <td>@item.PhoneNo</td>
@@ -30,8 +35,16 @@
                 <td>@item.Vehicle</td>
                 <td>@item.VehicleNumber</td>
                 <td>
-                    <a onclick="showInPopup('@Url.Action("AddOrEdit", "Employees", new { id = item.EmployeeId })', 'Edit Employee')" class="btn btn-primary btn-sm text-white">Edit</a>
-                    <a onclick="deleteRecord('Employees', @item.EmployeeId)" class="btn btn-danger btn-sm">Delete</a>
+                    <div class="btn-group-modern">
+                        <a onclick="showInPopup('@Url.Action("AddOrEdit", "Employees", new { id = item.EmployeeId })', 'Edit Employee')" 
+                           class="btn-modern-edit" title="Edit Employee">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a onclick="deleteRecord('Employees', @item.EmployeeId)" 
+                           class="btn-modern-delete" title="Delete Employee">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                    </div>
                 </td>
             </tr>
         }

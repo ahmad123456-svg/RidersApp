@@ -1,38 +1,36 @@
 @model RidersApp.ViewModels.UserVM
 @{
     Layout = null;
-    // Get preserved password from ViewBag if available
-    var preservedPassword = ViewBag.PreservedPassword as string ?? Model.Password;
-    var preservedConfirmPassword = ViewBag.PreservedConfirmPassword as string ?? Model.ConfirmPassword;
 }
 
-<form asp-action="AddOrEdit" asp-controller="Users" method="post" onsubmit="return ajaxFormSubmit(this);" autocomplete="off">
-    @if (Model.Id != null)
+<form asp-action="AddOrEdit" asp-controller="Users" method="post" onsubmit="return ajaxFormSubmit(this);">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    @if (Model.IsEdit)
     {
         <input type="hidden" asp-for="Id" />
     }
-    
-    <div class="form-group">
-        <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control" autocomplete="off" />
+
+    <div class="form-group mb-3">
+        <label asp-for="Email" class="control-label">Email Address</label>
+        <input asp-for="Email" class="form-control" />
         <span asp-validation-for="Email" class="text-danger"></span>
-        <small class="form-text text-muted">This email will be used as your username for login.</small>
     </div>
-    
-    <div class="form-group">
-        <label asp-for="FirstName"></label>
-        <input asp-for="FirstName" class="form-control" autocomplete="off" />
+
+    <div class="form-group mb-3">
+        <label asp-for="FirstName" class="control-label">First Name</label>
+        <input asp-for="FirstName" class="form-control" />
         <span asp-validation-for="FirstName" class="text-danger"></span>
     </div>
-    
-    <div class="form-group">
-        <label asp-for="LastName"></label>
-        <input asp-for="LastName" class="form-control" autocomplete="off" />
+
+    <div class="form-group mb-3">
+        <label asp-for="LastName" class="control-label">Last Name</label>
+        <input asp-for="LastName" class="form-control" />
         <span asp-validation-for="LastName" class="text-danger"></span>
     </div>
-    
-    <div class="form-group">
-        <label asp-for="Role"></label>
+
+    <div class="form-group mb-3">
+        <label asp-for="Role" class="control-label">Role</label>
         <select asp-for="Role" class="form-control">
             <option value="">-- Select Role --</option>
             <option value="Admin">Admin</option>
@@ -40,38 +38,30 @@
         </select>
         <span asp-validation-for="Role" class="text-danger"></span>
     </div>
-    
-    @* ? Only show password fields for new users, completely hide them for edit *@
+
     @if (!Model.IsEdit)
     {
-        <div class="form-group">
-            <label asp-for="Password"></label>
-            <input name="Password" class="form-control" type="password" 
-                   autocomplete="new-password" 
-                   placeholder="Enter password (minimum 8 characters)"
-                   value="@preservedPassword" />
+        <div class="form-group mb-3">
+            <label asp-for="Password" class="control-label">Password</label>
+            <input asp-for="Password" class="form-control" type="password" 
+                   value="@(ViewBag.PreservedPassword ?? "")" />
             <span asp-validation-for="Password" class="text-danger"></span>
             <small class="form-text text-muted">
-                <strong>Password Requirements:</strong> Minimum 8 characters. This field is required.
+                Password must be at least 6 characters long.
             </small>
         </div>
 
-        <div class="form-group">
-            <label asp-for="ConfirmPassword"></label>
-            <input name="ConfirmPassword" class="form-control" type="password" 
-                   autocomplete="new-password" 
-                   placeholder="Confirm your password"
-                   value="@preservedConfirmPassword" />
+        <div class="form-group mb-3">
+            <label asp-for="ConfirmPassword" class="control-label">Confirm Password</label>
+            <input asp-for="ConfirmPassword" class="form-control" type="password" 
+                   value="@(ViewBag.PreservedConfirmPassword ?? "")" />
             <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-            <small class="form-text text-muted">
-                Re-enter the password to confirm it matches.
-            </small>
         </div>
     }
 
-    <div class="form-group mt-3 text-end">
+    <div class="form-group mt-3">
         <button type="submit" class="btn btn-success">
-            <i class="fas fa-save"></i> @(Model.IsEdit ? "Update User" : "Create User")
+            <i class="fas fa-save"></i> @(Model.IsEdit ? "Update" : "Create")
         </button>
         <button type="button" class="btn btn-secondary" onclick="$('#form-modal').modal('hide');">
             <i class="fas fa-times"></i> Cancel
@@ -81,49 +71,4 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script>
-        $(document).ready(function() {
-            var isEditMode = @(Model.IsEdit ? "true" : "false");
-            console.log('Form loaded for:', isEditMode ? 'Edit User' : 'New User');
-            
-            if (!isEditMode) {
-                var passwordField = $('input[name="Password"]');
-                var confirmPasswordField = $('input[name="ConfirmPassword"]');
-                
-                // Real-time password confirmation validation for new users only
-                function validatePasswordMatch() {
-                    var password = passwordField.val();
-                    var confirmPassword = confirmPasswordField.val();
-                    
-                    if (confirmPassword.length > 0) {
-                        if (password === confirmPassword) {
-                            confirmPasswordField.removeClass('is-invalid').addClass('is-valid');
-                            confirmPasswordField.next('.text-danger').text('');
-                        } else {
-                            confirmPasswordField.removeClass('is-valid').addClass('is-invalid');
-                            confirmPasswordField.next('.text-danger').text('Passwords do not match.');
-                        }
-                    } else {
-                        confirmPasswordField.removeClass('is-valid is-invalid');
-                        confirmPasswordField.next('.text-danger').text('');
-                    }
-                }
-                
-                passwordField.on('input', validatePasswordMatch);
-                confirmPasswordField.on('input', validatePasswordMatch);
-                
-                // Add form validation feedback for new users
-                $('form').on('submit', function() {
-                    console.log('Form submitted for new user');
-                    console.log('Password field value length:', passwordField.val().length);
-                    console.log('Confirm password field value length:', confirmPasswordField.val().length);
-                });
-            } else {
-                // Add form validation feedback for edit users
-                $('form').on('submit', function() {
-                    console.log('Form submitted for edit user');
-                });
-            }
-        });
-    </script>
 }

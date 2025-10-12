@@ -19,6 +19,8 @@ namespace RidersApp.Data
         public DbSet<Employee> Employees { get; set; }
         public DbSet<DailyRides> DailyRides { get; set; }
         public DbSet<Configuration> Configurations { get; set; }
+        public DbSet<FineOrExpenseType> FineOrExpenseTypes { get; set; }
+        public DbSet<FineOrExpense> FineOrExpenses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -77,12 +79,31 @@ namespace RidersApp.Data
                 .Property(d => d.OverRidesAmount)
                 .HasPrecision(18, 2);
 
+            // Configure decimal precision for FineOrExpense
+            modelBuilder.Entity<FineOrExpense>()
+                .Property(f => f.Amount)
+                .HasPrecision(18, 2);
+
             //  Configure Employee-DailyRides relationship with cascade delete
             modelBuilder.Entity<DailyRides>()
                 .HasOne(d => d.Employee)
                 .WithMany(e => e.DailyRides)
                 .HasForeignKey(d => d.EmployeeId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure FineOrExpense-Employee relationship
+            modelBuilder.Entity<FineOrExpense>()
+                .HasOne(f => f.Employee)
+                .WithMany()
+                .HasForeignKey(f => f.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure FineOrExpense-FineOrExpenseType relationship
+            modelBuilder.Entity<FineOrExpense>()
+                .HasOne(f => f.FineOrExpenseType)
+                .WithMany()
+                .HasForeignKey(f => f.FineOrExpenseTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Configure indexes for better performance
             modelBuilder.Entity<Employee>()
@@ -96,6 +117,15 @@ namespace RidersApp.Data
 
             modelBuilder.Entity<DailyRides>()
                 .HasIndex(d => d.EmployeeId);
+
+            modelBuilder.Entity<FineOrExpense>()
+                .HasIndex(f => f.EmployeeId);
+
+            modelBuilder.Entity<FineOrExpense>()
+                .HasIndex(f => f.FineOrExpenseTypeId);
+
+            modelBuilder.Entity<FineOrExpense>()
+                .HasIndex(f => f.EntryDate);
         }
     }
 
