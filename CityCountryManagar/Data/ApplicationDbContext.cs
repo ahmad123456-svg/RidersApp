@@ -51,6 +51,12 @@ namespace RidersApp.Data
                 .HasForeignKey(e => e.CountryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Configure Employee entity
+            modelBuilder.Entity<Employee>()
+                .Property(e => e.PictureUrl)
+                .HasMaxLength(500)
+                .IsRequired(false);
+
             // Configure decimal precision for Employee Salary
             modelBuilder.Entity<Employee>()
                 .Property(e => e.Salary)

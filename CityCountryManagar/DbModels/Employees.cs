@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Http;
 
 namespace RidersApp.DbModels
 {
@@ -27,12 +28,19 @@ namespace RidersApp.DbModels
         public City City { get; set; }
         // Navigation for related DailyRides
         public ICollection<DailyRides> DailyRides { get; set; } = new List<DailyRides>();
-        public decimal Salary { get; set; }
+                public decimal Salary { get; set; }
+
+        [Required]
+        [StringLength(500)]
+        public string PictureUrl { get; set; } = string.Empty;
+
+        [NotMapped]
+        public IFormFile? PictureFile { get; set; }
+
         [StringLength(20)]
         public string Vehicle { get; set; }
+
         [StringLength(30)]
         public string VehicleNumber { get; set; }
-        [StringLength(500)]
-        public string? Picture { get; set; } // Picture file path, nullable for default image
     }
 }

@@ -17,6 +17,8 @@
         <textarea asp-for="Value" class="form-control" rows="4"></textarea>
         <span asp-validation-for="Value" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-primary">Create</button>
+    <button type="submit" class="btn btn-primary">
+        <i class="fas fa-save"></i> Save
+    </button>
     <a asp-action="Index" class="btn btn-secondary">Cancel</a>
 </form>

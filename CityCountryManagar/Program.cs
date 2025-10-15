@@ -8,9 +8,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using RidersApp.Areas.Identity.Data;
 using RidersApp.IServices;
-using RidersApp.Services; // Your custom user class
+using RidersApp.Services;
 using RidersApp.AutoMapper;
 using RidersApp.Utilities;
+using Microsoft.AspNetCore.Server.IIS;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +51,9 @@ builder.Services.AddDefaultIdentity<RidersAppUser>(options =>
 builder.Services.AddScoped<ICountryRepository, CountryRepository>();
 builder.Services.AddScoped<ICityRepository, CityRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+
+// Register File Service
+builder.Services.AddScoped<FileService>();
 builder.Services.AddScoped<IDailyRidesRepository, DailyRidesRepository>();
 builder.Services.AddScoped<ICityService, CityService>();
 builder.Services.AddScoped<ICountryService, CountryService>();
@@ -75,6 +81,24 @@ builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
 // MVC and Razor support
 builder.Services.AddControllersWithViews();
+
+// Configure form options for file uploads
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodySize = 10 * 1024 * 1024; // 10 MB
+});
+
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = 10 * 1024 * 1024; // 10 MB
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.ValueLengthLimit = int.MaxValue;
+    options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10 MB
+    options.MultipartHeadersLengthLimit = int.MaxValue;
+});
 builder.Services.AddRazorPages();
 
 var app = builder.Build();

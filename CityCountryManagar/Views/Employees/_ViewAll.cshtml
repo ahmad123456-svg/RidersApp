@@ -22,8 +22,16 @@
         {
             <tr>
                 <td>
-                    <img src="@item.PictureUrl" alt="Employee Picture" 
-                         class="employee-profile-img" />
+                    @if (!string.IsNullOrEmpty(item.PictureUrl) && !item.PictureUrl.Contains("default-profile.png") && !item.PictureUrl.Contains("/images/"))
+                    {
+                        <img src="@item.PictureUrl" alt="@item.Name" width="80" height="80" style="border-radius: 8px; object-fit: cover;" class="employee-profile-img" />
+                    }
+                    else
+                    {
+                        <div class="no-picture-placeholder" style="width: 80px; height: 80px; border-radius: 8px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; border: 2px dashed #ddd;">
+                            <i class="fas fa-user text-muted"></i>
+                        </div>
+                    }
                 </td>
                 <td>@item.Name</td>
                 <td>@item.FatherName</td>
@@ -50,3 +58,13 @@
         }
     </tbody>
 </table>
+
+<style>
+    .employee-profile-img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 2px solid #ccc;
+    }
+</style>

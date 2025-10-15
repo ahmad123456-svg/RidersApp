@@ -5,7 +5,7 @@
 }
 
     <div class="d-flex justify-content-between align-items-center mb-2">
-        <h4 class="mb-0">Employees</h4>
+        <h4 class="mb-0"><i class="fas fa-users text-primary me-2"></i>Employees</h4>
         <div>
             <button class="btn btn-crud-success" onclick="showInPopup('@Url.Action("AddOrEdit", "Employees")', 'Add Employee')">
                 <i class="fas fa-plus"></i> Add New
@@ -53,31 +53,33 @@
                 },
                 ajax: {
                     url: '@Url.Action("GetEmployeesData", "Employees")',
-                    type: 'POST'
+                    type: 'POST',
+                    error: function (xhr, error, thrown) {
+                        console.error('DataTables error:', error, thrown);
+                    }
                 },
+                order: [[1, 'asc']], // Order by name column by default
                 columns: [
                     { 
-                        data: 'picture',
-                        width: '80px',
+                        data: 'pictureUrl',
                         orderable: false,
                         searchable: false,
                         render: function (data, type, row) {
-                            var imageUrl = data && data !== '' ? data : '/Image/download.png';
-                            return `<img src="${imageUrl}" alt="Employee" class="img-profile-sm" />`;
+                            console.log('Picture URL:', data); // Debug log
+                            return `<img src="${data}" alt="Employee" class="img-profile-sm rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" onerror="this.src='/images/default-profile.png'; console.log('Image failed to load:', '${data}');" />`;
                         }
                     },
-                    { data: 'name', width: '120px' },
-                    { data: 'fatherName', width: '120px' },
-                    { data: 'phoneNo', width: '130px' },
-                    { data: 'address', width: '150px' },
-                    { data: 'countryName', width: '100px' },
-                    { data: 'cityName', width: '100px' },
-                    { data: 'salary', width: '120px' },
-                    { data: 'vehicle', width: '80px' },
-                    { data: 'vehicleNumber', width: '100px' },
+                    { data: 'name' },
+                    { data: 'fatherName' },
+                    { data: 'phoneNo' },
+                    { data: 'address' },
+                    { data: 'countryName' },
+                    { data: 'cityName' },
+                    { data: 'salary' },
+                    { data: 'vehicle' },
+                    { data: 'vehicleNumber' },
                     {
                         data: 'employeeId',
-                        width: '160px',
                         orderable: false,
                         searchable: false,
                         render: function (data, type, row) {
@@ -96,14 +98,12 @@
                 ],
                 responsive: true,
                 scrollX: true,
-                autoWidth: false,
                 paging: true,
                 pageLength: 25,
                 lengthChange: true,
                 searching: true,
                 ordering: true,
                 info: true,
-                autoWidth: false,
                 order: []
             });
         });

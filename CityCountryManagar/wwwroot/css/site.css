@@ -15,6 +15,7 @@ html {
 
 body {
     margin-bottom: 60px;
+    background: linear-gradient(90deg, lightBlue, black);
 }
 
 /* Table styles for all CRUD pages */
@@ -81,16 +82,17 @@ body {
     margin: 0 2px;
 }
 
-/* Black table styling */
+/* Gradient table styling matching body background */
 .table-dark {
-    background-color: #000000;
+    background: linear-gradient(90deg, lightblue, black);
     color: #ffffff;
 }
 
 .table-dark thead th {
-    background-color: #000000;
+    background: linear-gradient(90deg, rgba(173, 216, 230, 0.8), rgba(0, 0, 0, 0.8));
     border-color: #32383e;
     font-weight: 500;
+    color: #ffffff;
 }
 
 /* Table column widths */
@@ -130,10 +132,31 @@ body {
     height: 50px;
     object-fit: cover;
     border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
+.employee-profile-img-preview {
+    max-width: 38px;
+    max-height: 48px;
+    object-fit: cover;
+    border-radius: 110px;
+    margin: 2px 0;
+    border: 3px solid #007bff;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+/*.img-preview-container {
+    text-align: center;
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+}*/
+
 .table-dark tbody tr:hover {
-    background-color: #1a1a1a;
+    background: linear-gradient(90deg, rgba(173, 216, 230, 0.3), rgba(0, 0, 0, 0.7));
 }
 
 /* Responsive styles */
@@ -507,11 +530,35 @@ table.dataTable {
 
 .modal-body .form-group {
     margin-bottom: 1rem;
+   
 }
 
 .modal-body .row {
     margin-bottom: 0.5rem;
+   
 }
+.modal-dialog-scrollable .modal-body {
+    overflow-y: auto;
+    background: linear-gradient(90deg, lightBlue, black);
+}
+.modal-header {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    text-align: center;
+    -webkit-justify-content: inherit;
+    justify-content: inherit;
+    padding: var(--bs-modal-header-padding);
+    border-bottom: var(--bs-modal-header-border-width) solid var(--bs-modal-header-border-color);
+    border-top-left-radius: var(--bs-modal-inner-border-radius);
+    border-top-right-radius: var(--bs-modal-inner-border-radius);
+    background: linear-gradient(90deg, lightBlue, black);
+}
+    .modal-header .btn-close {
+        padding: calc(var(--bs-modal-header-padding-y) * .5) calc(var(--bs-modal-header-padding-x) * .5);
+        margin: calc(-.5 * var(--bs-modal-header-padding-y)) calc(-.5 * var(--bs-modal-header-padding-x)) calc(-.5 * var(--bs-modal-header-padding-y)) auto;
+      
+    }
 
 /* Form improvements */
 .form-control {

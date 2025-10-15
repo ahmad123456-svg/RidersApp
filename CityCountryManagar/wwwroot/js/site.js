@@ -212,10 +212,32 @@ function ajaxFormSubmit(form) {
     var originalText = submitButton.html();
     submitButton.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
     
+    // Check if form has file uploads
+    var hasFileUpload = $(form).find('input[type="file"]').length > 0;
+    var requestData;
+    var contentType;
+    var processData;
+    
+    if (hasFileUpload) {
+        // Use FormData for file uploads
+        requestData = new FormData(form);
+        contentType = false;
+        processData = false;
+        console.log('Using FormData for file upload');
+    } else {
+        // Use serialized data for regular forms
+        requestData = $(form).serialize();
+        contentType = 'application/x-www-form-urlencoded; charset=UTF-8';
+        processData = true;
+        console.log('Using serialized data for regular form');
+    }
+    
     $.ajax({
         type: 'POST',
         url: $(form).attr('action'),
-        data: $(form).serialize(),
+        data: requestData,
+        contentType: contentType,
+        processData: processData,
         success: function (res) {
             console.log('AJAX Success Response:', res);
             console.log('Response isValid:', res.isValid);
@@ -239,6 +261,10 @@ function ajaxFormSubmit(form) {
                 // Close modal using universal closeModal function
                 console.log('Calling closeModal from ajaxFormSubmit');
                 console.log('Checking if closeModal function exists:', typeof closeModal);
+                
+                // Clear file inputs after successful submission
+                $(form).find('input[type="file"]').val('');
+                console.log('Cleared file inputs');
                 
                 if (typeof closeModal === 'function') {
                     closeModal();

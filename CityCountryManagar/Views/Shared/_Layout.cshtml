@@ -12,10 +12,16 @@
     <title>@ViewData["Title"] - Riders App</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/RidersApp.styles.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/datatables.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/navbar.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/crud-buttons.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/table-styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/RidersApp.styles.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="//cdn.datatables.net/2.3.3/css/dataTables.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body>
     <style>
         /* User Info Styles */
         .user-info {
@@ -79,37 +85,6 @@
         .spinner-border-sm {
             width: 1rem;
             height: 1rem;
-        }
-    </style>
-    <link rel="stylesheet" href="~/css/navbar.css" asp-append-version="true" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
-    <link rel="stylesheet" href="//cdn.datatables.net/2.3.3/css/dataTables.dataTables.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-</head>
-<body>
-    <style>
-        body {
-            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-        }
-
-        table.dataTable thead th {
-            background: #f8f9fa;
-        }
-
-        table.dataTable {
-            width: 100% !important;
-        }
-
-        /* User Profile Dropdown Styles */
-        .user-profile-dropdown {
-            display: flex;
-            align-items: center;
-            text-decoration: none !important;
-            color: white !important;
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            transition: background-color 0.2s ease;
         }
 
         .user-profile-dropdown:hover {
@@ -233,13 +208,19 @@
                                         </ul>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" asp-controller="Employees" asp-action="Index">Employees</a>
+                                        <a class="nav-link" asp-controller="Employees" asp-action="Index">
+                                            <i class="fas fa-users me-1"></i> Employees
+                                        </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" asp-controller="DailyRides" asp-action="Index">Daily Rides</a>
+                                        <a class="nav-link" asp-controller="DailyRides" asp-action="Index">
+                                            <i class="fas fa-motorcycle me-1"></i> Daily Rides
+                                        </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" asp-controller="Configurations" asp-action="Index">Configurations</a>
+                                        <a class="nav-link" asp-controller="Configurations" asp-action="Index">
+                                            <i class="fas fa-cogs me-1"></i> Configurations
+                                        </a>
                                     </li>
                                     @* Combined Expense Types & Fine/Expenses Dropdown *@
                                     <li class="nav-item dropdown">
@@ -261,17 +242,23 @@
                                         </ul>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-controller="Users" asp-action="Index">Users</a>
+                                        <a class="nav-link" asp-controller="Users" asp-action="Index">
+                                            <i class="fas fa-user-shield me-1"></i> Users
+                                        </a>
                                     </li>
                                 }
                                 @* Regular users can only see specific menu items *@
                                 else if (User.IsInRole("User"))
                                 {
                                     <li class="nav-item">
-                                        <a class="nav-link" asp-controller="DailyRides" asp-action="Index">Daily Rides</a>
+                                        <a class="nav-link" asp-controller="DailyRides" asp-action="Index">
+                                            <i class="fas fa-motorcycle me-1"></i> Daily Rides
+                                        </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" asp-controller="Configurations" asp-action="Index">Configurations</a>
+                                        <a class="nav-link" asp-controller="Configurations" asp-action="Index">
+                                            <i class="fas fa-cogs me-1"></i> Configurations
+                                        </a>
                                     </li>
                                 }
                                 

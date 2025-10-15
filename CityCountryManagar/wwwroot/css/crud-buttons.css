@@ -38,97 +38,107 @@
     overflow: hidden;
 }
 
-/* Edit Button - Beautiful Blue Gradient */
+/* Edit Button - Enhanced Green Gradient */
 .btn-action-edit,
 .btn-modern-edit,
 .btn-crud-edit {
-    background: linear-gradient(135deg, #4f46e5, #7c3aed, #2563eb);
+    background: linear-gradient(135deg, #10b981, #059669, #047857);
     color: white;
-    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    border: 1px solid rgba(16, 185, 129, 0.5);
 }
 
 .btn-action-edit:hover,
 .btn-modern-edit:hover,
 .btn-crud-edit:hover {
-    background: linear-gradient(135deg, #3730a3, #5b21b6, #1d4ed8);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.6);
+    background: linear-gradient(135deg, #059669, #047857, #065f46);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
     color: white;
     text-decoration: none;
+    border-color: rgba(16, 185, 129, 0.7);
 }
 
-/* Delete Button - Beautiful Red Gradient */
+/* Delete Button - Dark Theme Compatible Red Gradient */
 .btn-action-delete,
 .btn-modern-delete,
 .btn-crud-delete {
-    background: linear-gradient(135deg, #ef4444, #dc2626, #f97316);
+    background: linear-gradient(135deg, #f87171, #ef4444, #dc2626);
     color: white;
-    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+    box-shadow: 0 4px 15px rgba(248, 113, 113, 0.3);
+    border: 1px solid rgba(248, 113, 113, 0.5);
 }
 
 .btn-action-delete:hover,
 .btn-modern-delete:hover,
 .btn-crud-delete:hover {
-    background: linear-gradient(135deg, #dc2626, #b91c1c, #ea580c);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.6);
+    background: linear-gradient(135deg, #ef4444, #dc2626, #b91c1c);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(248, 113, 113, 0.4);
     color: white;
     text-decoration: none;
+    border-color: rgba(248, 113, 113, 0.7);
 }
 
-/* Warning Button - Beautiful Orange/Yellow Gradient */
+/* Warning Button - Dark Theme Compatible Orange Gradient */
 .btn-action-warning,
 .btn-modern-warning,
 .btn-crud-warning {
-    background: linear-gradient(135deg, #f59e0b, #d97706, #f97316);
+    background: linear-gradient(135deg, #fb923c, #f97316, #ea580c);
     color: white;
-    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    box-shadow: 0 4px 15px rgba(251, 146, 60, 0.3);
+    border: 1px solid rgba(251, 146, 60, 0.5);
 }
 
 .btn-action-warning:hover,
 .btn-modern-warning:hover,
 .btn-crud-warning:hover {
-    background: linear-gradient(135deg, #d97706, #b45309, #ea580c);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.6);
+    background: linear-gradient(135deg, #f97316, #ea580c, #c2410c);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(251, 146, 60, 0.4);
     color: white;
     text-decoration: none;
+    border-color: rgba(251, 146, 60, 0.7);
 }
 
-/* Info Button - Beautiful Teal Gradient */
+/* Info Button - Dark Theme Compatible Cyan Gradient */
 .btn-action-info,
 .btn-modern-info,
 .btn-crud-info {
-    background: linear-gradient(135deg, #06b6d4, #0891b2, #0284c7);
+    background: linear-gradient(135deg, #22d3ee, #06b6d4, #0891b2);
     color: white;
-    box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+    box-shadow: 0 4px 15px rgba(34, 211, 238, 0.3);
+    border: 1px solid rgba(34, 211, 238, 0.5);
 }
 
 .btn-action-info:hover,
 .btn-modern-info:hover,
 .btn-crud-info:hover {
-    background: linear-gradient(135deg, #0891b2, #0e7490, #0369a1);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(6, 182, 212, 0.6);
+    background: linear-gradient(135deg, #06b6d4, #0891b2, #0e7490);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(34, 211, 238, 0.4);
     color: white;
     text-decoration: none;
+    border-color: rgba(34, 211, 238, 0.7);
 }
 
-/* Success Button - Beautiful Green Gradient */
+/* Success Button - Dark Theme Compatible Green Gradient */
 .btn-crud-success {
-    background: linear-gradient(135deg, #10b981, #059669, #16a34a);
+    background: linear-gradient(135deg, #34d399, #10b981, #059669);
     color: white;
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 4px 15px rgba(52, 211, 153, 0.3);
     padding: 10px 20px;
     font-size: 16px;
+    border: 1px solid rgba(52, 211, 153, 0.5);
 }
 
 .btn-crud-success:hover {
-    background: linear-gradient(135deg, #059669, #047857, #15803d);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.6);
+    background: linear-gradient(135deg, #10b981, #059669, #047857);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(52, 211, 153, 0.4);
     color: white;
     text-decoration: none;
+    border-color: rgba(52, 211, 153, 0.7);
 }
 
 /* Small button variants */
@@ -239,6 +249,7 @@
     cursor: not-allowed;
     transform: none !important;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    text-align: left;
 }
 
 /* Loading state */
@@ -324,4 +335,54 @@ a.btn-modern-warning {
 a.btn-action-warning:hover,
 a.btn-modern-warning:hover {
     color: white;
+}
+table.dataTable thead > tr > th.sorting, table.dataTable thead > tr > th.sorting_asc, table.dataTable thead > tr > th.sorting_desc, table.dataTable thead > tr > th.sorting_asc_disabled, table.dataTable thead > tr > th.sorting_desc_disabled, table.dataTable thead > tr > td.sorting, table.dataTable thead > tr > td.sorting_asc, table.dataTable thead > tr > td.sorting_desc, table.dataTable thead > tr > td.sorting_asc_disabled, table.dataTable thead > tr > td.sorting_desc_disabled {
+    cursor: pointer;
+    position: relative;
+    padding-right: 26px;
+    text-align: left;
+}
+
+/* Dark Theme Enhancements for CRUD Buttons */
+.btn-crud,
+.btn-action-edit,
+.btn-action-delete,
+.btn-action-warning,
+.btn-action-info,
+.btn-modern-edit,
+.btn-modern-delete,
+.btn-modern-warning,
+.btn-modern-info {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    font-weight: 500;
+}
+
+/* Better contrast for dark backgrounds */
+.btn-action-edit,
+.btn-modern-edit,
+.btn-crud-edit {
+    background: linear-gradient(135deg, #4ade80, #22c55e, #16a34a) !important;
+    border: 1px solid rgba(74, 222, 128, 0.6);
+}
+
+.btn-action-edit:hover,
+.btn-modern-edit:hover,
+.btn-crud-edit:hover {
+    background: linear-gradient(135deg, #22c55e, #16a34a, #15803d) !important;
+    border-color: rgba(74, 222, 128, 0.8);
+}
+
+/* Enhanced visibility for dark theme */
+@media (prefers-color-scheme: dark) {
+    .btn-crud,
+    .btn-action-edit,
+    .btn-action-delete,
+    .btn-action-warning,
+    .btn-action-info,
+    .btn-modern-edit,
+    .btn-modern-delete,
+    .btn-modern-warning,
+    .btn-modern-info {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(255, 255, 255, 0.1);
+    }
 }

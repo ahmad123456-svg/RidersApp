@@ -13,5 +13,6 @@ namespace RidersApp.IServices
         Task<List<EmployeeVM>> Edit(EmployeeVM vm);
         Task<List<EmployeeVM>> Delete(int id);
         Task<object> GetEmployeesData(IFormCollection form);
+        Task<(bool isValid, string message, List<EmployeeVM> employees)> AddOrEditEmployee(int id, EmployeeVM vm);
     }
 }

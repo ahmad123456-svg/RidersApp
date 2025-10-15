@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using RidersApp.IServices;
+using RidersApp.Services;
 using RidersApp.ViewModels;
 using System.Threading.Tasks;
 using System;
@@ -17,12 +18,18 @@ namespace RidersApp.Controllers
         private readonly IEmployeeService _employeeService;
         private readonly ICountryService _countryService;
         private readonly ICityService _cityService;
+        private readonly FileService _fileService;
 
-        public EmployeesController(IEmployeeService employeeService, ICountryService countryService, ICityService cityService)
+        public EmployeesController(
+            IEmployeeService employeeService, 
+            ICountryService countryService, 
+            ICityService cityService,
+            FileService fileService)
         {
             _employeeService = employeeService;
             _countryService = countryService;
             _cityService = cityService;
+            _fileService = fileService;
         }
 
         public IActionResult Index()
@@ -73,35 +80,42 @@ namespace RidersApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequestSizeLimit(10 * 1024 * 1024)] // 10 MB limit
+        [RequestFormLimits(MultipartBodyLengthLimit = 10 * 1024 * 1024)]
         public async Task<IActionResult> AddOrEdit(int id, EmployeeVM vm)
         {
+            // Remove validation for properties that aren't user input or are handled separately
             ModelState.Remove("CountryName");
             ModelState.Remove("CityName");
+            ModelState.Remove("PictureFile"); // We'll handle file validation in service
+            
+            // For new employees, remove PictureUrl validation since we'll set it after upload
+            if (vm.EmployeeId == 0 && id == 0)
+            {
+                ModelState.Remove("PictureUrl");
+            }
 
             if (ModelState.IsValid)
             {
-                string message;
-                var effectiveId = vm.EmployeeId != 0 ? vm.EmployeeId : id;
-                if (effectiveId == 0)
+                var (isValid, message, employees) = await _employeeService.AddOrEditEmployee(id, vm);
+                
+                if (isValid)
                 {
-                    await _employeeService.Add(vm);
-                    message = "Data saved successfully";
+                    return Json(new
+                    {
+                        isValid = true,
+                        message,
+                        html = Helper.RenderRazorViewToString(this, "_ViewAll", employees)
+                    });
                 }
                 else
                 {
-                    await _employeeService.Edit(vm);
-                    message = "Data updated successfully";
+                    // If service returned an error, treat as validation failure
+                    ModelState.AddModelError("", message);
                 }
-
-                var listVm = await _employeeService.GetAll();
-                return Json(new
-                {
-                    isValid = true,
-                    message,
-                    html = Helper.RenderRazorViewToString(this, "_ViewAll", listVm)
-                });
             }
 
+            // Handle validation errors
             ViewBag.Countries = new SelectList(await _countryService.GetAll(), "CountryId", "Name");
 
             // When validation fails, populate city list only for the selected country (if any)
@@ -120,6 +134,27 @@ namespace RidersApp.Controllers
                 isValid = false,
                 html = Helper.RenderRazorViewToString(this, "AddOrEdit", vm)
             });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> TestFileUpload(IFormFile testFile)
+        {
+            Console.WriteLine($"TestFileUpload: Received file: {(testFile != null ? $"{testFile.FileName} ({testFile.Length} bytes)" : "null")}");
+            
+            if (testFile != null && testFile.Length > 0)
+            {
+                try
+                {
+                    var uploadedPath = await _fileService.UploadEmployeeImage(testFile);
+                    return Json(new { success = true, path = uploadedPath, message = $"File uploaded successfully to: {uploadedPath}" });
+                }
+                catch (Exception ex)
+                {
+                    return Json(new { success = false, message = $"Upload failed: {ex.Message}" });
+                }
+            }
+            
+            return Json(new { success = false, message = "No file provided" });
         }
 
         [HttpPost]

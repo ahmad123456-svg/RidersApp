@@ -11,16 +11,16 @@ namespace RidersApp.Utilities
             {
                 Console.WriteLine("Starting employee picture update...");
                 
-                // Update all employees with NULL or empty pictures
+                // Only update employees with NULL pictures - don't override existing uploads
                 var employeesWithNullPictures = await context.Employees
-                    .Where(e => e.Picture == null || e.Picture == "")
+                    .Where(e => e.PictureUrl == null)
                     .ToListAsync();
 
                 if (employeesWithNullPictures.Any())
                 {
                     foreach (var employee in employeesWithNullPictures)
                     {
-                        employee.Picture = "/Image/download.png";
+                        employee.PictureUrl = "/images/default-profile.png";
                     }
 
                     await context.SaveChangesAsync();
@@ -31,28 +31,21 @@ namespace RidersApp.Utilities
                     Console.WriteLine("No employees found with NULL pictures.");
                 }
 
-                // Verify the update
-                var remainingNullPictures = await context.Employees
-                    .CountAsync(e => e.Picture == null || e.Picture == "");
-                
-                Console.WriteLine($"Employees with NULL pictures after update: {remainingNullPictures}");
-                
-                // Show all employee pictures
+                // Show all employee pictures for debugging
                 var allEmployees = await context.Employees
-                    .Select(e => new { e.EmployeeId, e.Name, e.Picture })
+                    .Select(e => new { e.EmployeeId, e.Name, e.PictureUrl })
                     .OrderBy(e => e.EmployeeId)
                     .ToListAsync();
 
                 Console.WriteLine("\nCurrent employee pictures:");
                 foreach (var emp in allEmployees)
                 {
-                    Console.WriteLine($"ID: {emp.EmployeeId}, Name: {emp.Name}, Picture: {emp.Picture ?? "NULL"}");
+                    Console.WriteLine($"ID: {emp.EmployeeId}, Name: {emp.Name}, Picture: {emp.PictureUrl ?? "NULL"}");
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error updating employee pictures: {ex.Message}");
-                throw;
             }
         }
     }

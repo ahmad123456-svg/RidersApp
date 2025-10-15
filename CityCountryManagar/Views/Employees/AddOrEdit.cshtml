@@ -9,18 +9,7 @@
 
 <form asp-action="AddOrEdit" asp-controller="Employees" method="post" enctype="multipart/form-data" onsubmit="return ajaxFormSubmit(this);">
     
-    <!-- Picture Upload Section -->
-    <div class="form-group text-center mb-3">
-        <label class="form-label">Employee Picture</label>
-        <div class="mb-2">
-            <img id="picturePreview" src="@Model.PictureUrl" alt="Employee Picture" 
-                 style="width: 120px; height: 120px; object-fit: cover; border-radius: 50%; border: 3px solid #ddd;" />
-        </div>
-        <input asp-for="PictureFile" class="form-control" type="file" accept="image/*" onchange="previewImage(this)" />
-        <small class="form-text text-muted">Upload JPG, PNG, or GIF (Max 5MB). Leave empty for default picture.</small>
-        <span asp-validation-for="PictureFile" class="text-danger"></span>
-        <input type="hidden" asp-for="Picture" />
-    </div>
+ 
 
     <div class="form-group">
         <label asp-for="Name"></label>
@@ -76,30 +65,55 @@
         <input asp-for="VehicleNumber" class="form-control" />
         <span asp-validation-for="VehicleNumber" class="text-danger"></span>
     </div>
+    <!-- Picture Upload Section -->
+    <div class="form-group text-center mb-3">
+
+        <div class="img-preview-container">
+            @if (!string.IsNullOrEmpty(Model.PictureUrl) && !Model.PictureUrl.Contains("default-profile.png") && !Model.PictureUrl.Contains("/images/"))
+            {
+                <img id="picturePreview" src="@Model.PictureUrl" alt="Employee Picture" class="employee-profile-img-preview" />
+            }
+            else
+            {
+                <div id="picturePreview" class="employee-profile-img-preview no-image-placeholder">
+                </div>
+            }
+        </div>
+        <div class="mt-2">
+            <input asp-for="PictureFile" class="form-control" type="file" accept="image/*" onchange="previewImage(this)" />
+            <small class="form-text text-muted">Upload JPG, PNG, or GIF (Max 5MB) - Required for new employees</small>
+            <span asp-validation-for="PictureFile" class="text-danger"></span>
+            <span asp-validation-for="PictureUrl" class="text-danger"></span>
+        </div>
+        <!-- Always include hidden PictureUrl field -->
+        <input type="hidden" asp-for="PictureUrl" />
+    </div>
 
     <input type="hidden" asp-for="EmployeeId" />
     <div class="form-group mt-2 text-end">
-        <button type="submit" class="btn btn-success">Save</button>
+        <button type="submit" class="btn btn-success">
+            <i class="fas fa-save"></i> Save
+        </button>
     </div>
 </form>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
-        // Image preview function
         function previewImage(input) {
             if (input.files && input.files[0]) {
                 var reader = new FileReader();
                 
                 reader.onload = function(e) {
-                    $('#picturePreview').attr('src', e.target.result);
+                    // Replace the placeholder div with an actual image
+                    var container = $('.img-preview-container');
+                    container.html('<img id="picturePreview" src="' + e.target.result + '" alt="Employee Picture" class="employee-profile-img-preview" />');
+                    
+                    // Clear the hidden PictureUrl since we have a new file
+                    $('#PictureUrl').val('');
                 }
                 
                 reader.readAsDataURL(input.files[0]);
-            } else {
-                // If no file selected, show the original image (could be default or existing employee picture)
-                var originalSrc = '@Model.PictureUrl';
-                $('#picturePreview').attr('src', originalSrc);
             }
         }
 
@@ -109,6 +123,29 @@
 
             // set initial disabled state based on server-provided cities
             $('#CityId').prop('disabled', cityHasItems === "false");
+
+            // Form submission validation
+            $('form').on('submit', function(e) {
+                var pictureUrl = $('#PictureUrl').val();
+                var pictureFile = $('#PictureFile')[0].files.length;
+                var employeeId = @(Model.EmployeeId);
+                
+                // For new employees (ID = 0), require a picture file
+                if (employeeId === 0 && pictureFile === 0 && !pictureUrl) {
+                    e.preventDefault();
+                    alert('Picture is required for new employees. Please upload an employee picture.');
+                    return false;
+                }
+                
+                // For existing employees, require either existing picture or new file
+                if (employeeId > 0 && pictureFile === 0 && !pictureUrl) {
+                    e.preventDefault();
+                    alert('Employee must have a picture. Please upload a new picture.');
+                    return false;
+                }
+                
+                return true;
+            });
 
             $('#CountryId').change(function () {
                 var countryId = $(this).val();
@@ -144,6 +181,27 @@
             // If there's an initial country but empty cities, trigger change to attempt load
             if ($('#CountryId').val() && !cityHasItems) {
                 $('#CountryId').trigger('change');
+            }
+
+            // Image preview function
+            window.previewImage = function(input) {
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+                    
+                    reader.onload = function (e) {
+                        // Replace the placeholder div with an actual image
+                        var container = $('.img-preview-container');
+                        container.html('<img id="picturePreview" src="' + e.target.result + '" alt="Employee Picture" class="employee-profile-img-preview" />');
+                    }
+                    
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
+
+            // Function to clear file input after successful submission
+            window.clearPictureFile = function() {
+                $('input[name="PictureFile"]').val('');
+                console.log('PictureFile input cleared');
             }
         });
     </script>

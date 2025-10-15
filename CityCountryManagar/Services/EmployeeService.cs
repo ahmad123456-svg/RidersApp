@@ -19,17 +19,20 @@ namespace RidersApp.Services
         private readonly ICityRepository _cityRepository;
         private readonly ICountryRepository _countryRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly FileService _fileService;
 
         public EmployeeService(
             IEmployeeRepository employeeRepository,
             ICityRepository cityRepository,
             ICountryRepository countryRepository,
-            IWebHostEnvironment webHostEnvironment)
+            IWebHostEnvironment webHostEnvironment,
+            FileService fileService)
         {
             _employeeRepository = employeeRepository;
             _cityRepository = cityRepository;
             _countryRepository = countryRepository;
             _webHostEnvironment = webHostEnvironment;
+            _fileService = fileService;
         }
 
         public async Task<List<EmployeeVM>> GetAll()
@@ -45,6 +48,7 @@ namespace RidersApp.Services
                 {
                     EmployeeId = e.EmployeeId,
                     Name = e.Name,
+                    PictureUrl = e.PictureUrl,
                     FatherName = e.FatherName,
                     PhoneNo = e.PhoneNo,
                     Address = e.Address,
@@ -54,8 +58,7 @@ namespace RidersApp.Services
                     CityName = e.City != null ? e.City.CityName : null,
                     Vehicle = e.Vehicle,
                     VehicleNumber = e.VehicleNumber,
-                    Salary = e.Salary,
-                    Picture = !string.IsNullOrEmpty(e.Picture) ? e.Picture : "/Image/download.png" // Always return a picture
+                    Salary = e.Salary
                 }).ToList();
         }
 
@@ -82,7 +85,7 @@ namespace RidersApp.Services
                 Vehicle = employee.Vehicle,
                 VehicleNumber = employee.VehicleNumber,
                 Salary = employee.Salary,
-                Picture = !string.IsNullOrEmpty(employee.Picture) ? employee.Picture : "/Image/download.png" // Always return a picture
+                PictureUrl = employee.PictureUrl
             };
         }
 
@@ -124,15 +127,6 @@ namespace RidersApp.Services
 
         public async Task<List<EmployeeVM>> Add(EmployeeVM vm)
         {
-            // Handle picture upload
-            var picturePath = await UploadPictureAsync(vm.PictureFile);
-            
-            // If no picture was uploaded, set default picture
-            if (string.IsNullOrEmpty(picturePath))
-            {
-                picturePath = "/Image/download.png";
-            }
-
             var employee = new Employee
             {
                 Name = vm.Name,
@@ -144,11 +138,35 @@ namespace RidersApp.Services
                 Vehicle = vm.Vehicle,
                 VehicleNumber = vm.VehicleNumber,
                 Salary = vm.Salary,
-                Picture = picturePath // Always has a value (uploaded or default)
+                PictureUrl = string.Empty // Will be set below
             };
 
+            // Handle file upload if provided
+            if (vm.PictureFile != null && vm.PictureFile.Length > 0)
+            {
+                try
+                {
+                    var uploadedUrl = await _fileService.UploadEmployeeImage(vm.PictureFile);
+                    employee.PictureUrl = uploadedUrl; // Save the actual uploaded URL
+                    vm.PictureUrl = uploadedUrl; // Also update the ViewModel
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Picture upload failed: {ex.Message}");
+                }
+            }
+            else
+            {
+                // No file uploaded - picture is required, so this should cause validation error
+                throw new Exception("Picture is required. Please upload an employee picture.");
+            }
+
+            // Clear the PictureFile after processing (successful or not)
+            vm.PictureFile = null;
+
+            // Save to database
             await _employeeRepository.AddEmployee(employee);
-            // Return employees ordered alphabetically
+            
             return await GetAll();
         }
 
@@ -157,6 +175,7 @@ namespace RidersApp.Services
             var employee = await _employeeRepository.GetEmployeeById(vm.EmployeeId);
             if (employee != null)
             {
+                // Update basic fields
                 employee.Name = vm.Name;
                 employee.FatherName = vm.FatherName;
                 employee.PhoneNo = vm.PhoneNo;
@@ -166,27 +185,54 @@ namespace RidersApp.Services
                 employee.Vehicle = vm.Vehicle;
                 employee.VehicleNumber = vm.VehicleNumber;
                 employee.Salary = vm.Salary;
-
-                // Handle picture upload - only update if new file is provided
-                if (vm.PictureFile != null)
+                
+                // Handle picture upload if new file is provided
+                if (vm.PictureFile != null && vm.PictureFile.Length > 0)
                 {
-                    // Delete old picture if it exists and is not the default
-                    if (!string.IsNullOrEmpty(employee.Picture) && employee.Picture != "/Image/download.png")
+                    try
                     {
-                        var oldPicturePath = Path.Combine(_webHostEnvironment.WebRootPath, employee.Picture.TrimStart('/'));
-                        if (File.Exists(oldPicturePath))
+                        // Delete old picture if it exists and is a real uploaded file
+                        if (!string.IsNullOrEmpty(employee.PictureUrl) && 
+                            !employee.PictureUrl.Contains("default-profile.png") &&
+                            !employee.PictureUrl.Contains("/images/") &&
+                            employee.PictureUrl.StartsWith("/uploads/employees/"))
                         {
-                            File.Delete(oldPicturePath);
+                            var oldPicturePath = Path.Combine(_webHostEnvironment.WebRootPath, employee.PictureUrl.TrimStart('/'));
+                            if (File.Exists(oldPicturePath))
+                            {
+                                File.Delete(oldPicturePath);
+                            }
                         }
-                    }
 
-                    // Upload new picture
-                    employee.Picture = await UploadPictureAsync(vm.PictureFile);
+                        // Upload new picture and update URL
+                        var uploadedUrl = await _fileService.UploadEmployeeImage(vm.PictureFile);
+                        employee.PictureUrl = uploadedUrl;
+                        vm.PictureUrl = uploadedUrl; // Also update the ViewModel
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception($"Picture upload failed: {ex.Message}");
+                    }
                 }
+                else
+                {
+                    // Keep existing picture URL - it's required so there should already be one
+                    if (string.IsNullOrEmpty(employee.PictureUrl))
+                    {
+                        throw new Exception("Picture is required. Please upload an employee picture.");
+                    }
+                }
+                
+                // Clear the PictureFile after processing (whether uploaded or not)
+                vm.PictureFile = null;
 
                 await _employeeRepository.UpdateEmployee(employee);
             }
-            // Return employees ordered alphabetically
+            else
+            {
+                throw new Exception($"Employee with ID {vm.EmployeeId} not found.");
+            }
+            
             return await GetAll();
         }
 
@@ -201,10 +247,10 @@ namespace RidersApp.Services
                     throw new InvalidOperationException($"Employee with ID {id} not found.");
                 }
 
-                // Delete uploaded picture file (if it exists and is not the default)
-                if (!string.IsNullOrEmpty(employee.Picture) && employee.Picture != "/Image/download.png")
+                // Delete uploaded picture file (if it exists)
+                if (!string.IsNullOrEmpty(employee.PictureUrl))
                 {
-                    var picturePath = Path.Combine(_webHostEnvironment.WebRootPath, employee.Picture.TrimStart('/'));
+                    var picturePath = Path.Combine(_webHostEnvironment.WebRootPath, employee.PictureUrl.TrimStart('/'));
                     if (File.Exists(picturePath))
                     {
                         File.Delete(picturePath);
@@ -240,10 +286,10 @@ namespace RidersApp.Services
             var sortDirection = form["order[0][dir]"].FirstOrDefault();
 
             int.TryParse(sortColumnIndexString, out int sortColumnIndex);
-            string[] columnNames = new[] { "Picture", "Name", "FatherName", "PhoneNo", "Address", "CountryName", "CityName", "Salary", "Vehicle", "VehicleNumber" };
+            string[] columnNames = new[] { "pictureUrl", "name", "fatherName", "phoneNo", "address", "countryName", "cityName", "salary", "vehicle", "vehicleNumber" };
             string sortColumn = (sortColumnIndex >= 0 && sortColumnIndex < columnNames.Length)
                 ? columnNames[sortColumnIndex]
-                : columnNames[1]; // Default to "Name" since Picture is not sortable
+                : columnNames[1]; // Default to "name" since pictureUrl is not sortable
 
             var all = await GetAll();
             var query = all.AsQueryable();
@@ -270,21 +316,21 @@ namespace RidersApp.Services
             bool ascending = string.Equals(sortDirection, "asc", StringComparison.OrdinalIgnoreCase);
             query = sortColumn switch
             {
-                "Name" => ascending ? query.OrderBy(x => x.Name) : query.OrderByDescending(x => x.Name),
-                "FatherName" => ascending ? query.OrderBy(x => x.FatherName) : query.OrderByDescending(x => x.FatherName),
-                "PhoneNo" => ascending ? query.OrderBy(x => x.PhoneNo) : query.OrderByDescending(x => x.PhoneNo),
-                "Address" => ascending ? query.OrderBy(x => x.Address) : query.OrderByDescending(x => x.Address),
-                "CountryName" => ascending ? query.OrderBy(x => x.CountryName) : query.OrderByDescending(x => x.CountryName),
-                "CityName" => ascending ? query.OrderBy(x => x.CityName) : query.OrderByDescending(x => x.CityName),
-                "Salary" => ascending ? query.OrderBy(x => x.Salary) : query.OrderByDescending(x => x.Salary),
-                "Vehicle" => ascending ? query.OrderBy(x => x.Vehicle) : query.OrderByDescending(x => x.Vehicle),
-                "VehicleNumber" => ascending ? query.OrderBy(x => x.VehicleNumber) : query.OrderByDescending(x => x.VehicleNumber),
+                "name" => ascending ? query.OrderBy(x => x.Name) : query.OrderByDescending(x => x.Name),
+                "fatherName" => ascending ? query.OrderBy(x => x.FatherName) : query.OrderByDescending(x => x.FatherName),
+                "phoneNo" => ascending ? query.OrderBy(x => x.PhoneNo) : query.OrderByDescending(x => x.PhoneNo),
+                "address" => ascending ? query.OrderBy(x => x.Address) : query.OrderByDescending(x => x.Address),
+                "countryName" => ascending ? query.OrderBy(x => x.CountryName) : query.OrderByDescending(x => x.CountryName),
+                "cityName" => ascending ? query.OrderBy(x => x.CityName) : query.OrderByDescending(x => x.CityName),
+                "salary" => ascending ? query.OrderBy(x => x.Salary) : query.OrderByDescending(x => x.Salary),
+                "vehicle" => ascending ? query.OrderBy(x => x.Vehicle) : query.OrderByDescending(x => x.Vehicle),
+                "vehicleNumber" => ascending ? query.OrderBy(x => x.VehicleNumber) : query.OrderByDescending(x => x.VehicleNumber),
                 _ => ascending ? query.OrderBy(x => x.Name) : query.OrderByDescending(x => x.Name)
             };
 
             var pageData = query.Skip(start).Take(length).Select(x => new
             {
-                picture = x.Picture ?? "/Image/download.png",
+                pictureUrl = x.PictureUrl ?? "/images/default-profile.png",
                 name = x.Name,
                 fatherName = x.FatherName,
                 phoneNo = x.PhoneNo,
@@ -304,6 +350,36 @@ namespace RidersApp.Services
                 recordsFiltered,
                 data = pageData
             };
+        }
+
+        public async Task<(bool isValid, string message, List<EmployeeVM> employees)> AddOrEditEmployee(int id, EmployeeVM vm)
+        {
+            try
+            {
+                var effectiveId = vm.EmployeeId != 0 ? vm.EmployeeId : id;
+
+                string message;
+                if (effectiveId == 0)
+                {
+                    await Add(vm);
+                    message = "Employee added successfully";
+                }
+                else
+                {
+                    await Edit(vm);
+                    message = "Employee updated successfully";
+                }
+
+                // Clear PictureFile after processing
+                vm.PictureFile = null;
+
+                var employees = await GetAll();
+                return (true, message, employees);
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message, new List<EmployeeVM>());
+            }
         }
     }
 }

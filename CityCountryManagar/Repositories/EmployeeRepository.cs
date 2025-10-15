@@ -32,8 +32,10 @@ namespace RidersApp.Repositories
 
         public async Task AddEmployee(Employee employee)
         {
+            Console.WriteLine($"Repository: Adding employee {employee.Name} with PictureUrl: {employee.PictureUrl ?? "NULL"}");
             _context.Employees.Add(employee);
             await _context.SaveChangesAsync();
+            Console.WriteLine($"Repository: Employee {employee.Name} saved with ID: {employee.EmployeeId}");
         }
 
         public async Task UpdateEmployee(Employee employee)

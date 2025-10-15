@@ -79,7 +79,7 @@ namespace RidersApp.Data
                                 Salary = 50000 + (i * 1000),
                                 Vehicle = i % 2 == 0 ? "Car" : "Motorcycle",
                                 VehicleNumber = $"VH-{i:D3}",
-                                Picture = "/Image/download.png" // Set default picture
+                                PictureUrl = "images/default-profile.png" // Set default picture
                             });
                         }
                     }
